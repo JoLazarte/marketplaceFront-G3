@@ -7,7 +7,9 @@ const Header = () => {
   return (
 
     <div id='headerContainer'>
-      <div id='logo'></div>
+      <div id='logo'>
+        <span></span>
+      </div>
       <div class='menu'>
         <span id='searchBar'><SearchBar ></SearchBar></span>
       </div>
