@@ -4,7 +4,8 @@ const NavAside = () => {
   return (
 
     <div id='navAside'>
-        <p>HOLAAAAAAAAAAA</p>
+        <p>LIBROS</p>
+        <p>MUSICA</p>
     </div>
   )
 }
