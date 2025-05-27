@@ -1,14 +1,22 @@
-import NavBar from '../NavBar/NavBar'
+import NavAside from '../NavAside/NavAside'
 import Footer from '../Footer/Footer'
-import { Main, Section } from './Layout.styles'
+import './Layout.css'
+import Header from '../Header/Header'
 
 const Layout = ({ children }) => {
   return (
-    <Main>
-      <NavBar/>
-      <Section>{children}</Section>
+    <>
+      <Header/>
+      <NavAside/>
+      <main>
+        <section id='portada' >{children}</section>
+        <section class='carrusel' id='nuevosLibros'>{children}</section>
+        <section class='carrusel' id='librosMasVendidos'>{children}</section>
+         <section class='carrusel' id='nuevosDiscos'>{children}</section>
+        <section class='carrusel' id='discosMasVendidos'>{children}</section>
+      </main>
       <Footer/>
-    </Main>
+    </>
   )
 }
 export default Layout

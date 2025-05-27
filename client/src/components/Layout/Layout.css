@@ -1,0 +1,21 @@
+#portada{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 250px 20px 20px 20px;
+  background-color: rgba(233, 237, 241, 0.92);
+
+}
+.carrusel{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 50px 20px 50px 20px;
+  background-color: rgba(233, 237, 241, 0.92);
+
+
+}

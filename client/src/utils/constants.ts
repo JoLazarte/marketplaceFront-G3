@@ -1,5 +1,3 @@
-export const NAVBAR_HEIGHT = '4rem';
-
 export const COLORS = {
   red: '#d1041c',
   yellow: '#fc9003',

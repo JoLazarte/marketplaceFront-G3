@@ -1,0 +1,30 @@
+#headerContainer {
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 5rem;
+  width: 100vw; 
+  padding: 0.8rem;
+  box-shadow: 0px 0px 20px 0px rgb(16, 93, 125);
+  background-color: #6bb9bd;
+}
+.menu{
+  display: flex;
+  flex-direction: row;
+   justify-content: flex-end;
+  font-family: 'Fraunces', serif;
+   
+padding-top: 15px;
+padding-right: 0px;
+   
+
+}
+.icono-login{
+   margin-right: 20px;
+    
+}
+#searchBar{
+  margin-right: 0px;
+}

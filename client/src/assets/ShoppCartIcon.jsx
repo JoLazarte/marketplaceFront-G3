@@ -1,4 +1,4 @@
-import React from 'react';
+
 import styled from 'styled-components';
 
 const ShoppCartIcon = () => {
@@ -20,7 +20,7 @@ const StyledWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 15px;
+    padding: 9.5px 15px;
     gap: 15px;
     background-color: #181717;
     outline: 3px #181717 solid;
