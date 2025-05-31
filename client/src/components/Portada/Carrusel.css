@@ -8,9 +8,10 @@
 }
 
 .slide {
-
+ 
   width: 100%;
   height: 600px;
+  transition: transform .8s ease-in-out;
  
 }
 
@@ -20,20 +21,39 @@
 .imgCarrusel{
   position: absolute;
   width: 100%;
-  height: 600px
+  height: 630px;
+  object-fit: cover;
 }
-.caption{
+.insideCard{
     position: absolute;
     color:white;
-    padding-top: 20rem;
-    padding-left: 2rem;
+    margin-top: 7rem;
+    margin-left: 39%;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    background: rgba(26, 24, 24, 0.718);
+    border-radius: 1rem;
+    max-width: 420px;
+    translate: middle;
+    text-align: center;
+   
+}
+.btnInsideCard{
+  border-radius: 2rem; 
+  padding: 0.2rem 0.8rem;
+  color: #18191a;
+  font-weight: 600;
 }
 .arrow {
   position:absolute;
-  filter: drop-shadow(0px 0px 5px #555);
-  width: 2rem;
-  height: 2rem;
-  color: white;
+  filter: drop-shadow(0px 0px 5px #b2acac);
+  width: 2.1rem;
+  height: 2.1rem;
+  color: rgb(242, 236, 236);
+
 }
 
 .arrow:hover {
@@ -41,17 +61,18 @@
 }
 
 .arrow-left {
-  left: 1rem;
+  left: 3rem;
 }
 
 .arrow-right {
-  right: 1rem;
+  right: 3rem;
 }
 
 .indicators {
   display: flex;
   position: absolute;
   bottom: 1rem;
+  transition: all 800ms ease-in-out;
 }
 
 .indicator {

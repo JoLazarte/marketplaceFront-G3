@@ -59,14 +59,17 @@ const StyledWrapper = styled.div`
     cursor: pointer;
     box-shadow: 0px 0px 10px rgb(208, 191, 191);
   }
-    .imgContainer{
+
+  .imgContainer{
+
       position: relative;
       height: 350px;
+      width: 100%;
     }
 
    .img {
      position: absolute;
-      width: 260px;
+      width: 100%;
       height:350px;
      border-top-left-radius: 10px;
      border-top-right-radius: 10px;
@@ -143,7 +146,7 @@ const StyledWrapper = styled.div`
 
   .button {
   
-    padding: 10px;
+    padding: 5px 8px;
     background-color:rgb(25, 27, 28);;
     border-radius: 10px;
     text-align: center;
