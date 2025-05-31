@@ -1,12 +1,12 @@
 import Layout from './components/Layout/Layout'
 //import ProductCard from './components/ProductCard/ProductCard'
-import ProductGrid from './components/ProductCard/ProductGrid'
+//se puede sacar el ProductGrid
 function App() {
 
 
   return (
     <Layout>
-      <ProductGrid/>
+      
     </Layout>
   )
 }

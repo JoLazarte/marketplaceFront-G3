@@ -26,7 +26,7 @@ const StyledWrapper = styled.div`
   }
 
   .input {
-    height: 40px;
+    height: 43px;
     line-height: 28px;
     padding: 0 1rem;
     width: 500px;
@@ -34,9 +34,9 @@ const StyledWrapper = styled.div`
     border: 2px solid transparent;
     border-radius: 8px;
     outline: none;
-    background-color:rgb(216, 232, 232);
+    background-color: #f3ede8;
     color: #0d0c22;
-    box-shadow: 0 0 5px #C1D9BF, 0 0 0 10px #f5f5f5eb;
+    box-shadow: 0px 0px 10px rgb(78, 65, 65);
     transition: .3s ease;
   }
 
@@ -47,7 +47,7 @@ const StyledWrapper = styled.div`
   .icon {
     position: absolute;
     left: 1rem;
-    fill: #777;
+    fill:rgb(26, 22, 101);
     width: 1rem;
     height: 1rem;
   }`;

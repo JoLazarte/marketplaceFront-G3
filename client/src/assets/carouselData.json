@@ -1,0 +1,25 @@
+{
+  "slides": [
+    {
+      "id": 1,
+      "src": "/1.png",
+      "alt": "Image 1 for carousel",
+      "title": "Title 1",
+      "text": "description 1"
+    },
+    {
+      "id": 2,
+      "src": "/2.png",
+      "alt": "Image 2 for carousel",
+      "title": "Title 2",
+      "text": "description 2"
+    },
+    {
+      "id": 3,
+      "src": "/3.png",
+      "alt": "Image 3 for carousel",
+      "title": "Title 3",
+      "text": "description 3"
+    }
+  ]
+}

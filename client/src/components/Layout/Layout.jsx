@@ -2,8 +2,10 @@ import NavAside from '../NavAside/NavAside'
 import Footer from '../Footer/Footer'
 import './Layout.css'
 import Header from '../Header/Header'
-import CarruselPortada from '../../assets/CarruselPortada'
-import ProductGrid from '../ProductCard/ProductGrid'
+import Carrusel from '../Portada/Carrusel'
+import { slides } from '../../assets/carouselData.json'
+import Books from '../Book/Books'
+
 
 const Layout = () => {
   return (
@@ -12,23 +14,23 @@ const Layout = () => {
       <NavAside/>
       <main>
         <section id='portada' >
-          <CarruselPortada > </CarruselPortada>
+          <Carrusel data={slides}> </Carrusel>
         </section>
         <h3>Nuevos ingresos en libros</h3>
-        <section class='carrusel' id='nuevosLibros'>
-          <ProductGrid></ProductGrid>
+        <section className='carrusel' id='nuevosLibros'>
+          <Books></Books>
         </section>
         <h3>Los libros mas vendidos</h3>
-        <section class='carrusel' id='librosMasVendidos'>
-          <ProductGrid></ProductGrid>
+        <section className='carrusel' id='librosMasVendidos'>
+          <Books></Books>
         </section>
         <h3>Nuevos ingresos en música</h3>
-         <section class='carrusel' id='nuevosDiscos'>
-            <ProductGrid></ProductGrid>
+         <section className='carrusel' id='nuevosDiscos'>
+            <Books></Books>
          </section>
         <h3>Artistas mas populares</h3> 
-        <section class='carrusel' id='discosMasVendidos'>
-          <ProductGrid></ProductGrid>
+        <section className='carrusel' id='discosMasVendidos'>
+          <Books></Books>
         </section>
       </main>
       <Footer/>
