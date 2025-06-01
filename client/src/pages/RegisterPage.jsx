@@ -11,11 +11,35 @@ const RegisterPage = () => {
     email: ''
   });
 
-  const [emailError, setEmailError] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false
+  });
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     return regex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const minLength = password.length >= 6;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (!minLength) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    if (!hasUpperCase) {
+      return 'La contraseña debe tener al menos una mayúscula';
+    }
+    if (!hasNumber) {
+      return 'La contraseña debe tener al menos un número';
+    }
+    return '';
   };
 
   const handleChange = (e) => {
@@ -24,25 +48,51 @@ const RegisterPage = () => {
       ...prevState,
       [name]: value
     }));
+  };
 
-    // Validación específica para el email
-    if (name === 'email') {
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({
+      ...prev,
+      [name]: true
+    }));
+
+    if (name === 'email' && touched.email) {
       if (!value) {
-        setEmailError('El email es requerido');
+        setErrors(prev => ({ ...prev, email: 'El email es requerido' }));
       } else if (!validateEmail(value)) {
-        setEmailError('Por favor, ingresa un email válido');
+        setErrors(prev => ({ ...prev, email: 'Por favor, ingresa un email válido' }));
       } else {
-        setEmailError('');
+        setErrors(prev => ({ ...prev, email: '' }));
       }
+    }
+
+    if (name === 'password') {
+      const passwordError = validatePassword(value);
+      setErrors(prev => ({ ...prev, password: passwordError }));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validateEmail(formData.email)) {
-      setEmailError('Por favor, ingresa un email válido');
+    
+    // Validar todo antes de enviar
+    const emailError = !validateEmail(formData.email) ? 'Por favor, ingresa un email válido' : '';
+    const passwordError = validatePassword(formData.password);
+
+    setErrors({
+      email: emailError,
+      password: passwordError
+    });
+    setTouched({
+      email: true,
+      password: true
+    });
+
+    if (emailError || passwordError) {
       return;
     }
+
     // Aquí irá la lógica para enviar los datos al backend
     console.log('Datos del formulario:', formData);
   };
@@ -71,9 +121,28 @@ const RegisterPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               placeholder="Ingresa tu contraseña"
+              $hasError={touched.password && !!errors.password}
             />
+            {touched.password && errors.password && (
+              <ErrorMessage>{errors.password}</ErrorMessage>
+            )}
+            <PasswordRequirements>
+              La contraseña debe tener:
+              <RequirementList>
+                <Requirement $isMet={formData.password.length >= 6}>
+                  • Mínimo 6 caracteres
+                </Requirement>
+                <Requirement $isMet={/[A-Z]/.test(formData.password)}>
+                  • Al menos una mayúscula
+                </Requirement>
+                <Requirement $isMet={/[0-9]/.test(formData.password)}>
+                  • Al menos un número
+                </Requirement>
+              </RequirementList>
+            </PasswordRequirements>
           </InputGroup>
 
           <InputGroup>
@@ -107,11 +176,14 @@ const RegisterPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
               placeholder="Ingresa tu email"
-              $hasError={!!emailError}
+              $hasError={touched.email && !!errors.email}
             />
-            {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
+            {touched.email && errors.email && (
+              <ErrorMessage>{errors.email}</ErrorMessage>
+            )}
           </InputGroup>
 
           <Button type="submit">Registrarse</Button>
@@ -230,6 +302,24 @@ const LoginLink = styled.p`
       text-decoration: underline;
     }
   }
+`;
+
+const PasswordRequirements = styled.div`
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #a8a8a8;
+`;
+
+const RequirementList = styled.div`
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const Requirement = styled.span`
+  color: ${props => props.$isMet ? '#00ff00' : '#a8a8a8'};
+  transition: color 0.3s ease;
 `;
 
 export default RegisterPage; 
