@@ -23,7 +23,7 @@ const Layout = () => {
         </section>
         <br className='separation'/>
         <section className='carrusel' id='nuevosLibros'>
-         <h3>Nuevos ingresos en libros</h3>
+         <h3 className='h3layout'>Nuevos ingresos en libros</h3>
           <Books></Books>
         </section>
         <section className='carrusel' id='librosMasVendidos'>
