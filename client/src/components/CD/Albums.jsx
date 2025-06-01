@@ -1,10 +1,10 @@
 import React, { useRef } from 'react'
 import Slider from 'react-slick'
 import styled from 'styled-components'
-import ProductCardDiscs from './ProductCardDiscs';
+import ProductCardAlbum from './ProductCardAlbum';
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
-export const discs = [
+export const albums = [
     {
         id: "1",
         title: "Abbey Road",
@@ -107,41 +107,34 @@ var settings = {
       }
     ]}
 
-const Discs = () => {
+const Albums = () => {
     const arrowRef = useRef(null);
-    const discList = discs.map((item, i) => (
-        <ProductCardDiscs item={item} key={i}/>
+    const albumDisc = albums.map((item, i) => (
+        <ProductCardAlbum item={item} key={i}/>
     ));
 
     return (
         <Container id='cardContainer'>
             <Slider className="marginCard" ref={arrowRef} {...settings}>
-                {discList}
+                {albumDisc}
             </Slider> 
-            <Buttons>
-                <button 
-                    onClick={() => arrowRef.current.slickPrev()}
-                    className='back'><SlArrowLeft/></button>
-                <button 
-                    onClick={() => arrowRef.current.slickNext()}
-                    className='next'><SlArrowRight/></button>
-            </Buttons>
+            <SlArrowLeft onClick={() => arrowRef.current.slickPrev()} className='arr backArr'/>
+            <SlArrowRight onClick={() => arrowRef.current.slickNext()} className='arr forwardArr'/> 
         </Container>
     )
 }
 
-export default Discs
+export default Albums
 
 const Container = styled.div`
     width: 80%;
     height: 100%;
     margin: 0 auto;
-    position: relative;
+    position:relative;
 
     @media(max-width:840px){
         width: 90%;
     }
-    
     .marginCard{
         margin: inherit;
     }
@@ -170,45 +163,32 @@ const Container = styled.div`
     }
     
     .slick-dots li.slick-active button{
-        background: rgb(248, 244, 244);
+        background:rgb(248, 244, 244);
         width: 15px;
     }
 
     .slick-dots li{
         margin: 0;
     }
+   
+    .arr{
+       background-color: transparent;
+       position:absolute;
+        cursor: pointer;
+        color: rgb(242, 236, 236); 
+        margin-top:-12rem;
+        font-size: 1.4rem;
+    }
+  
+    .arr.backArr{
+        margin-left:-2rem;
+    }
+    .arr.forwardArr{
+        margin-left:65rem;
+    }
+    
 
     @media(max-width:530px){
         display: none;
     }
-`
-
-const Buttons = styled.div`
-    button{
-        width: 2rem;
-        height: 2rem;
-        background-color: rgba(255, 255, 255, 0.1);
-        cursor: pointer;
-        color: #01be96;
-        border: none;
-        position: absolute;
-        top: 45%;
-        right: -1rem;
-        transform: translateY(-50%);
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.3s ease;
-        
-        &:hover{
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-50%) scale(1.1);
-        }
-    }
-    
-    .back{
-        left: -1rem;
-        right: auto;
-    }
-`
+` 

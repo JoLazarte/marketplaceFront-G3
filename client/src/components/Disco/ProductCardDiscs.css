@@ -1,0 +1,138 @@
+.container {
+  width: 90%;
+  padding: 10px;
+  margin: 0 auto;
+}
+
+.container .link-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+.img-container {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.img-container img:hover {
+  transform: scale(1.05);
+}
+
+.details {
+  padding: 10px 0;
+  text-align: left;
+}
+
+.title {
+  font-size: 1.2rem;
+  margin: 5px 0;
+  color: #ffffff;
+}
+
+.author {
+  font-size: 1rem;
+  color: #a8a8a8;
+  margin: 5px 0;
+}
+
+.record-label {
+  font-size: 0.9rem;
+  color: #808080;
+  margin: 2px 0;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #d4d4d4;
+  margin: 5px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #00ff00;
+  margin: 10px 0;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.card {
+  width: 260px;
+  height: 520px;
+  margin-right: 20px;
+  padding: 0;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid rgb(66, 61, 61);
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0px 0px 10px rgb(236, 222, 222);
+  transform: translateY(-5px);
+}
+
+.card img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background: rgb(194, 200, 217);
+}
+
+.card-info {
+  padding: 18px;
+  display: flex;
+  height: 150px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-info h3 {
+  font-family: system-ui;
+  font-size: 20px;
+  font-weight: 600;
+  color: black;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.card-info p {
+  font-family: system-ui;
+  color: rgb(88, 82, 82);
+  font-size: 16px;
+  margin: 0;
+  text-align: center;
+  padding: 5px;
+  flex-grow: 1;
+}
+
+.card-info .record-label {
+  font-size: 14px;
+  color: rgb(128, 128, 128);
+}
+
+.card-info .price {
+  font-family: system-ui;
+  font-size: 20px;
+  font-weight: 600;
+  color: black;
+  text-align: center;
+  margin-top: auto;
+} 
