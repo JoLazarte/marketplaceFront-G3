@@ -5,6 +5,8 @@ import Header from '../Header/Header'
 import Carrusel from '../Portada/Carrusel'
 import { slides } from '../../assets/carouselData.json'
 import Books from '../Book/Books'
+import SubPortada from '../Portada/SubPortada'
+import Reviews from '../Reviews/Reviews'
 
 
 const Layout = () => {
@@ -16,24 +18,32 @@ const Layout = () => {
         <section id='portada' >
           <Carrusel data={slides}> </Carrusel>
         </section>
-        <h3>Nuevos ingresos en libros</h3>
+        <section id="subPortada" >
+          <SubPortada/>
+        </section>
+        <br className='separation'/>
         <section className='carrusel' id='nuevosLibros'>
+         <h3>Nuevos ingresos en libros</h3>
           <Books></Books>
         </section>
-        <h3>Los libros mas vendidos</h3>
         <section className='carrusel' id='librosMasVendidos'>
+          <h3>Los libros mas vendidos</h3>
           <Books></Books>
-        </section>
-        <h3>Nuevos ingresos en música</h3>
+        </section>  
          <section className='carrusel' id='nuevosDiscos'>
+            <h3>Nuevos ingresos en música</h3>
             <Books></Books>
          </section>
-        <h3>Artistas mas populares</h3> 
         <section className='carrusel' id='discosMasVendidos'>
+          <h3>Artistas mas populares</h3> 
           <Books></Books>
         </section>
+        <section className='grid'>
+          <h3>Lo que dicen nuestros clientes</h3>
+          <Reviews/>
+        </section>
       </main>
-      <Footer/>
+      <Footer />
     </>
   )
 }

@@ -24,9 +24,9 @@ const Carrusel = ({data}) =>{
              alt={item.alt}
             />
             <div className='insideCard'>
-              <h4 title={item.title}> {item.title} </h4>
+              <h3 title={item.title}> {item.title} </h3>
               <p text={item.text} > {item.text} </p>
-              <button className="btnInsideCard" textButton={item.textButton}> {item.textButton}</button>
+              <button className="btnInsideCard" textbutton={item.textbutton}> {item.textbutton}</button>
             </div>
            
           </div>

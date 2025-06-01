@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import Slider from 'react-slick'
 import styled from 'styled-components'
 import ProductCardBook from './ProductCardBook';
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
 
 let books = [
@@ -119,21 +119,14 @@ const Books = () => {
         <ProductCardBook item={item} key={i}/>
     ))
   return (
-    <Container id='client'>
-       
-        <div className='cards'>
-            <Slider ref={arrowRef} {...settings}>
-                {bookDisc}
-            </Slider>
-            <Buttons>
-                <button
-                onClick={() => arrowRef.current.slickPrev()}
-                ><IoIosArrowBack/></button>
-                <button
-                onClick={() => arrowRef.current.slickNext()}
-                ><IoIosArrowForward/></button>
-            </Buttons>
-        </div>
+    <Container id='cardContainer'>
+            <Slider className="marginCard" ref={arrowRef} {...settings}>
+                {bookDisc} 
+               
+            </Slider> 
+            <SlArrowLeft onClick={() => arrowRef.current.slickPrev()} className='arr backArr'/>
+            <SlArrowRight onClick={() => arrowRef.current.slickNext()} className='arr forwardArr'/> 
+          
     </Container>
   )
 }
@@ -143,16 +136,20 @@ export default Books
 const Container = styled.div`
     width: 80%;
     height: 100%;
-    
     margin: 0 auto;
+    position:relative;
 
     @media(max-width:840px){
         width: 90%;
     }
-
-
+    .marginCard{
+        margin: inherit; /*cambia el espacio entre cards*/
+        
+    }
+  
     .slick-list, .slick-slider, .slick-track{
         padding: 0;
+        
     }
 
     .slick-dots{
@@ -175,29 +172,30 @@ const Container = styled.div`
     }
     
     .slick-dots li.slick-active button{
-        background:rgb(255, 255, 255);
+        background:rgb(248, 244, 244);
         width: 15px;
     }
 
     .slick-dots li{
         margin: 0;
     }
-   .cards{
-    position: relative;}
-`
-const Buttons = styled.div`
-    position: absolute;
-    right: 0.7rem;
-    bottom: -2rem;
-
-    button{
-        background-color: transparent;
-        margin-left: 0.5rem;
-        border: none;
-        color:rgb(253, 254, 255);
+   
+    .arr{
+       background-color: transparent;
+       position:absolute;
         cursor: pointer;
-        font-size: 1.1rem;
+        color: rgb(242, 236, 236); 
+        margin-top:-12rem;
+        font-size: 1.4rem;
     }
+  
+    .arr.backArr{
+        margin-left:-2rem;
+    }
+    .arr.forwardArr{
+        margin-left:65rem;
+    }
+    
 
     @media(max-width:530px){
         display: none;

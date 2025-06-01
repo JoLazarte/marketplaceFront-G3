@@ -7,7 +7,7 @@ const Header = () => {
 
     <div id='headerContainer'>
       <div id='logo'>
-        <img src="/public/Dumbo.jpg" alt="Logo" width="45" height="45" class="me-2"/>
+        <img src="/Dumbo.jpg" alt="Logo" width="45" height="45" className="me-2"/>
         <span className="logo-text">Dumbo Librerías</span>
       </div>
       <div className='menu' >

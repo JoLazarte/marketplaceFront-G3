@@ -1,11 +1,18 @@
 footer {
-  
-  width: 100vw; 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 60px;
-  padding-bottom: 60px;
+
+  padding:160px 0px;
   color: rgb(240, 245, 255);
  background-color: #625f5f;
+}
+
+.footer-btns{
+  margin-right: -8rem;
+}
+
+.footer-btns button,
+.footer-btns a {
+  margin-right: 1rem;
+}
+.marginright{
+  margin-left: -8rem;
 }

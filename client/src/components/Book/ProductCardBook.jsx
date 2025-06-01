@@ -9,7 +9,7 @@ const ProductCardBook = (props) => {
          <div className='imgContainer'>
            <img src={img_url} alt={title} className='img' />
             <div className="save">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 683 683" height={683} width={683} className="svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 683 683" className="svg">
               <g clipPath="url(#clip0_993_25)">
                 <mask height={683} width={683} y={0} x={0} maskUnits="userSpaceOnUse" style={{maskType: 'luminance'}} id="mask0_993_25">
                   <path fill="white" d="M0 -0.00012207H682.667V682.667H0V-0.00012207Z" />
@@ -35,7 +35,7 @@ const ProductCardBook = (props) => {
           </div>
           
         </div>
-        </div>
+      </div>
        
     </StyledWrapper>
   )
@@ -47,7 +47,8 @@ const StyledWrapper = styled.div`
    .cardS {
     width: 260px;
     height:520px;
-    margin-right:2px;
+    margin-right:20px;
+    padding:0px;
     background: white;
     border-radius: 10px;
     border: 1px solid rgb(66, 61, 61);
@@ -56,8 +57,9 @@ const StyledWrapper = styled.div`
   }
 
   .cardS:hover {
+    
     cursor: pointer;
-    box-shadow: 0px 0px 10px rgb(208, 191, 191);
+    box-shadow: 0px 0px 10px rgb(236, 222, 222);
   }
 
   .imgContainer{
@@ -84,7 +86,7 @@ const StyledWrapper = styled.div`
     margin-left: 219px;
     width: 30px;
     height: 30px;
-    padding:2px;
+    
     background-color:rgba(255, 255, 255, 0.89);
     position: absolute;
     display: flex;
@@ -94,8 +96,10 @@ const StyledWrapper = styled.div`
 
   .save .svg {
     transition: 0.2s ease-in-out;
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
+    fill:none;
+    
     
   }
 
@@ -111,11 +115,12 @@ const StyledWrapper = styled.div`
     align-items: space-around;
   }
   .priceBuy{
-  display:flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top:12px;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top:14px;
+    padding:0px;
   }
   .text .titulo {
     font-family: system-ui;
