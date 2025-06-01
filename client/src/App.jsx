@@ -5,12 +5,15 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import Header from './components/Header/Header'
 import Footer from './components/Footer/Footer'
+import Cart from './components/Cart/Cart'
+import { CartProvider } from './context/CartContext'
 //import ProductCard from './components/ProductCard/ProductCard'
 //se puede sacar el ProductGrid
 function App() {
   return (
-    <>
+    <CartProvider>
       <Header />
+      <Cart />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="detail/:type/:id" element={<DetailPage />} />
@@ -19,7 +22,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
       </Routes>
       <Footer />
-    </>
+    </CartProvider>
   )
 }
 

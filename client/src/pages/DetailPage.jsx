@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { books } from '../components/Book/Books'
 import { discs } from '../components/Disco/Discs'
+import { useCart } from '../context/CartContext'
 
 const DetailPage = () => {
   const { type, id } = useParams()
+  const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1);
   
   useEffect(() => {
@@ -17,7 +19,14 @@ const DetailPage = () => {
     : books.find(book => book.id === id)
 
   if (!item) {
-    return <div>Producto no encontrado</div>
+    return (
+      <Container>
+        <Card>
+          <h1>Producto no encontrado</h1>
+          <p>Lo sentimos, el producto que buscas no está disponible.</p>
+        </Card>
+      </Container>
+    );
   }
 
   const isDisc = type === 'disc'
@@ -35,22 +44,22 @@ const DetailPage = () => {
   };
 
   const handleAddToCart = () => {
-    // Aquí irá la lógica para agregar al carrito
-    console.log('Agregando al carrito:', {
+    const itemToAdd = {
       ...item,
-      quantity
-    });
+      quantity: quantity
+    };
+    addToCart(itemToAdd);
   };
 
   return (
     <Container>
       <Card>
         <ImageContainer>
-          <img src={item.urlImage[0]} alt={item.title} />
+          <img src={item.image || item.img_url || item.urlImage?.[0]} alt={item.title} />
         </ImageContainer>
         <InfoContainer>
           <Title>{item.title}</Title>
-          <Author>{item.author}</Author>
+          <Author>{isDisc ? item.artist : item.author}</Author>
           
           {isDisc ? (
             <RecordInfo>
@@ -83,7 +92,7 @@ const DetailPage = () => {
           <Description>{item.description}</Description>
           
           <GenreContainer>
-            {(isDisc ? item.genres : item.genreBooks).map((genre, index) => (
+            {(isDisc ? item.genres : item.genreBooks || []).map((genre, index) => (
               <GenreTag key={index}>{genre}</GenreTag>
             ))}
           </GenreContainer>
