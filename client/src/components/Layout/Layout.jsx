@@ -1,18 +1,21 @@
 import NavAside from '../NavAside/NavAside'
-import Footer from '../Footer/Footer'
 import './Layout.css'
-import Header from '../Header/Header'
 import Carrusel from '../Portada/Carrusel'
 import { slides } from '../../assets/carouselData.json'
 import Books from '../Book/Books'
+import Discs from '../Disco/Discs'
 import SubPortada from '../Portada/SubPortada'
 import Reviews from '../Reviews/Reviews'
+import { Outlet, useLocation } from 'react-router-dom'
 
 
 const Layout = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   return (
     <>
-      <Header/>
+     {isHomePage ? (
+      <>
       <NavAside/>
       <main>
         <section id='portada' >
@@ -32,18 +35,21 @@ const Layout = () => {
         </section>  
          <section className='carrusel' id='nuevosDiscos'>
             <h3 className='h3layout' >Nuevos ingresos en música</h3>
-            <Books></Books>
+            <Discs></Discs>
          </section>
         <section className='carrusel' id='discosMasVendidos'>
           <h3 className='h3layout' >Artistas mas populares</h3> 
-          <Books></Books>
+          <Discs></Discs>
         </section>
         <section className='grid'>
           <h3 className='h3layout' >Lo que dicen nuestros clientes</h3>
           <Reviews/>
         </section>
       </main>
-      <Footer />
+      </>
+     ):(
+      <Outlet />
+     )}
     </>
   )
 }

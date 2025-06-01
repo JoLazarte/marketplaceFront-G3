@@ -1,4 +1,3 @@
-import ShoppCartIcon from '../../assets/ShoppCartIcon'
 import './NavAside.css'
 const NavAside = () => {
   return (

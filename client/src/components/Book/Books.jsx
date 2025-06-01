@@ -4,90 +4,93 @@ import styled from 'styled-components'
 import ProductCardBook from './ProductCardBook';
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
-
-let books = [
+export const books = [
     {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://cdn4.volusion.store/zjhys-xrwrf/v/vspfiles/photos/9781338596700-2.jpg",
-        price: "$ 23000"
-      
+        id: "1",
+        title: "1984",
+        author: "George Orwell",
+        editorial: "Secker & Warburg",
+        description: "Una distopía política sobre un régimen totalitario.",
+        isbn: "978-0451524935",
+        genreBooks: ["Ficción", "Distopía", "Política"],
+        price: 18.99,
+        stock: 12,
+        urlImage: ["https://covers.openlibrary.org/b/id/8225631-L.jpg"]
     },
     {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://cdn.kobo.com/book-images/20eefc4d-6653-419e-a003-fac3a68a8b87/1200/1200/False/hamlet-prince-of-denmark-25.jpg",
-        price: "$ 23000"
-       
+        id: "2",
+        title: "Cien años de soledad",
+        author: "Gabriel García Márquez",
+        editorial: "Editorial Sudamericana",
+        description: "La saga de la familia Buendía en el mítico pueblo de Macondo.",
+        isbn: "978-0307474728",
+        genreBooks: ["Realismo mágico", "Ficción literaria"],
+        price: 21.99,
+        stock: 8,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1327881361i/320.jpg"]
     },
     {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://m.media-amazon.com/images/I/913qsYmTdmL._AC_UF894,1000_QL80_.jpg",
-        price: "$ 23000"
-      
+        id: "3",
+        title: "El Señor de los Anillos",
+        author: "J.R.R. Tolkien",
+        editorial: "Minotauro",
+        description: "La épica aventura de Frodo para destruir el Anillo Único.",
+        isbn: "978-0544003415",
+        genreBooks: ["Fantasía", "Aventura"],
+        price: 25.99,
+        stock: 15,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1566425108i/33.jpg"]
     },
     {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://m.media-amazon.com/images/I/81W2JNcbBuL._AC_UF1000,1000_QL80_.jpg",
-        price: "$ 23000"
-       
+        id: "4",
+        title: "Don Quijote de la Mancha",
+        author: "Miguel de Cervantes",
+        editorial: "Real Academia Española",
+        description: "Las aventuras del ingenioso hidalgo Don Quijote.",
+        isbn: "978-8424938437",
+        genreBooks: ["Clásico", "Aventura", "Sátira"],
+        price: 23.99,
+        stock: 10,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1546112331i/3836.jpg"]
     },
     {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://wordery.com/jackets/201d0b25/the-scum-villains-self-saving-system-vol-4-moxiangtongxiu-author-xiao-tong-kong-illustrator-9781638585541.jpg",
-        price: "$ 23000"
-      
+        id: "5",
+        title: "Rayuela",
+        author: "Julio Cortázar",
+        editorial: "Alfaguara",
+        description: "Una novela experimental que puede leerse en múltiples órdenes.",
+        isbn: "978-8420437484",
+        genreBooks: ["Ficción experimental", "Literatura latinoamericana"],
+        price: 19.99,
+        stock: 6,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
     },
-    {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1697979350i/149426533.jpg",
-        price: "$ 23000"
-       
+     {
+        id: "5",
+        title: "Rayuela",
+        author: "Julio Cortázar",
+        editorial: "Alfaguara",
+        description: "Una novela experimental que puede leerse en múltiples órdenes.",
+        isbn: "978-8420437484",
+        genreBooks: ["Ficción experimental", "Literatura latinoamericana"],
+        price: 19.99,
+        stock: 6,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
     },
-    {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://m.media-amazon.com/images/I/81PxjL46RCL._AC_UF1000,1000_QL80_.jpg",
-        price: "$ 23000"
-       
-    },
-    {
-        title : "Titulo 1",
-        autor:"Autor",
-        autor:"Autor",
-        description : "Lorem Ipsum 1",
-        img_url : "https://cdn.archonia.com/images/1-104059110-2-1-original1/cardcaptor-sakura-clear-card-vol-10-gn-manga.jpg",
-        price: "$ 23000"
-       
-    },
-    {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://m.media-amazon.com/images/I/61zq3LbjyaL._AC_UF1000,1000_QL80_.jpg",
-        price: "$ 23000"
-       
-    },
-    {
-        title : "Titulo 1",
-        description : "Lorem Ipsum 1",
-        autor:"Autor",
-        img_url : "https://m.media-amazon.com/images/I/81BFTBjLW0L._AC_UF1000,1000_QL80_DpWeblab_.jpg",
-        price: "$ 23000"
-       
+     {
+        id: "5",
+        title: "Rayuela",
+        author: "Julio Cortázar",
+        editorial: "Alfaguara",
+        description: "Una novela experimental que puede leerse en múltiples órdenes.",
+        isbn: "978-8420437484",
+        genreBooks: ["Ficción experimental", "Literatura latinoamericana"],
+        price: 19.99,
+        stock: 6,
+        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
     }
 ]
+
 var settings = {
     dots: true,
     infinite: true,
@@ -125,12 +128,11 @@ var settings = {
 
 const Books = () => {
     const arrowRef = useRef(null);
-    let bookDisc = "";
-    bookDisc = books.map((item, i) => (
+    const bookDisc = books.map((item, i) => (
         <ProductCardBook item={item} key={i}/>
     ))
-  return (
-    <Container id='cardContainer'>
+    return (
+        <Container id='cardContainer'>
             <Slider className="marginCard" ref={arrowRef} {...settings}>
                 {bookDisc} 
                
@@ -138,14 +140,14 @@ const Books = () => {
             <SlArrowLeft onClick={() => arrowRef.current.slickPrev()} className='arr backArr'/>
             <SlArrowRight onClick={() => arrowRef.current.slickNext()} className='arr forwardArr'/> 
           
-    </Container>
+       </Container>
   )
 }
 
 export default Books
 
 const Container = styled.div`
-    width: 80%;
+    width: 82%;
     height: 100%;
     margin: 0 auto;
     position:relative;
@@ -204,7 +206,7 @@ const Container = styled.div`
         margin-left:-2rem;
     }
     .arr.forwardArr{
-        margin-left:65rem;
+        margin-left:67rem;
     }
     
 
