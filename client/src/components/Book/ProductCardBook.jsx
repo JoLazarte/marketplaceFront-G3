@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const ProductCardBook = (props) => {
-    const {title, description, price, img_url} = props.item;
+    const {title, description, autor, price, img_url} = props.item;
   return (
      <StyledWrapper>
         <div className='cardS'>
@@ -27,8 +27,9 @@ const ProductCardBook = (props) => {
           </div>
           </div>
         <div className="text">
-          <h1 className='titulo'>{title}</h1>
-          <p className="descrProd">{description}</p>
+          <h6 className='titulo'>{title}</h6>
+          <span className='autor'>{autor}</span>
+          <span className="descrProd">{description}</span>
           <div className='priceBuy'> 
             <button className='price'>{price}</button>
             <button className="button">Add To Cart</button>
@@ -108,12 +109,28 @@ const StyledWrapper = styled.div`
   }
 
   .text {
-    padding: 18px;
+    padding: 20px 15px;
     display: flex;
     height:150px;
     flex-direction: column;
-    align-items: space-around;
+    justify-content:space-between;
+    font-family: system-ui;
+    margin: 0px;
+    
+    
   }
+    .titulo{
+      line-height: 1rem;
+    }
+    .autor{
+      line-height: 1rem;
+      font-size:18px;
+    }
+    .descrProd{
+      line-height: 1.1rem;
+      font-size:18px;
+    }
+
   .priceBuy{
     display:flex;
     flex-direction: row;
@@ -122,13 +139,7 @@ const StyledWrapper = styled.div`
     margin-top:14px;
     padding:0px;
   }
-  .text .titulo {
-    font-family: system-ui;
-    font-size: 20px;
-    font-weight: 600;
-    color: black;
-    text-align:center;
-  }
+  
   .price{
     font-family: system-ui;
     font-size: 20px;
@@ -140,14 +151,7 @@ const StyledWrapper = styled.div`
     
     }
 
-  .text .descrProd {
-    font-family: system-ui;
-    color:rgb(88, 82, 82);
-    font-size: 16px;
-    margin: 0px;
-    text-align: center;
-    padding: 5px;
-  }
+  
 
   .button {
   

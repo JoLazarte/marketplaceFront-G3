@@ -9,6 +9,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://cdn4.volusion.store/zjhys-xrwrf/v/vspfiles/photos/9781338596700-2.jpg",
         price: "$ 23000"
       
@@ -16,6 +17,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://cdn.kobo.com/book-images/20eefc4d-6653-419e-a003-fac3a68a8b87/1200/1200/False/hamlet-prince-of-denmark-25.jpg",
         price: "$ 23000"
        
@@ -23,6 +25,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://m.media-amazon.com/images/I/913qsYmTdmL._AC_UF894,1000_QL80_.jpg",
         price: "$ 23000"
       
@@ -30,6 +33,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://m.media-amazon.com/images/I/81W2JNcbBuL._AC_UF1000,1000_QL80_.jpg",
         price: "$ 23000"
        
@@ -37,6 +41,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://wordery.com/jackets/201d0b25/the-scum-villains-self-saving-system-vol-4-moxiangtongxiu-author-xiao-tong-kong-illustrator-9781638585541.jpg",
         price: "$ 23000"
       
@@ -44,6 +49,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1697979350i/149426533.jpg",
         price: "$ 23000"
        
@@ -51,12 +57,15 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://m.media-amazon.com/images/I/81PxjL46RCL._AC_UF1000,1000_QL80_.jpg",
         price: "$ 23000"
        
     },
     {
         title : "Titulo 1",
+        autor:"Autor",
+        autor:"Autor",
         description : "Lorem Ipsum 1",
         img_url : "https://cdn.archonia.com/images/1-104059110-2-1-original1/cardcaptor-sakura-clear-card-vol-10-gn-manga.jpg",
         price: "$ 23000"
@@ -65,6 +74,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://m.media-amazon.com/images/I/61zq3LbjyaL._AC_UF1000,1000_QL80_.jpg",
         price: "$ 23000"
        
@@ -72,6 +82,7 @@ let books = [
     {
         title : "Titulo 1",
         description : "Lorem Ipsum 1",
+        autor:"Autor",
         img_url : "https://m.media-amazon.com/images/I/81BFTBjLW0L._AC_UF1000,1000_QL80_DpWeblab_.jpg",
         price: "$ 23000"
        
