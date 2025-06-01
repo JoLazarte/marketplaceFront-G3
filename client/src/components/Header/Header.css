@@ -7,7 +7,7 @@
   height: 5rem;
   width: 100vw; 
   padding: 1.5rem;
- 
+  top:0;
   background-color:  #1f1f1f;
   color: #fff !important;
 }
@@ -31,12 +31,16 @@
 
 }
 .icono-login{
-   margin-right: 8px;
+  display: flex;
+  gap: 0.5rem;
+  margin-right: 8px;
     
 }
 .contacto{
-  margin-right: 20px;
-  cursor: pointer;
+  margin-right: 15px;
+ cursor: pointer;
+ color: white;
+ font-size: 1rem;
 }
 #searchBar{
   margin-right: 0px;
