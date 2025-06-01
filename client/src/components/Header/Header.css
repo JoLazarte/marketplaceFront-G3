@@ -6,7 +6,7 @@
   justify-content: space-between;
   height: 5rem;
   width: 100vw; 
-  padding: 1rem 2rem;
+  padding: 1rem 1.5rem; 
  
   background-color:  #1a1a1a;
   color: #fff !important;
@@ -35,12 +35,11 @@
   gap: 1rem;
 }
 .icono-login{
-   margin-right: 20px;
    display: flex;
    gap: 0.5rem;
 }
 .contacto{
-  margin-right: 20px;
+  margin-right: 5px;
   cursor: pointer;
   color: white;
   font-size: 1rem;
@@ -61,7 +60,7 @@
 .icono-cart {
   display: flex;
   align-items: center;
-  margin-left: 0.5rem;
+  
 }
 
 @media (max-width: 768px) {
