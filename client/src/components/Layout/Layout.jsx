@@ -27,19 +27,19 @@ const Layout = () => {
           <Books></Books>
         </section>
         <section className='carrusel' id='librosMasVendidos'>
-          <h3>Los libros mas vendidos</h3>
+          <h3 className='h3layout' >Los libros mas vendidos</h3>
           <Books></Books>
         </section>  
          <section className='carrusel' id='nuevosDiscos'>
-            <h3>Nuevos ingresos en música</h3>
+            <h3 className='h3layout' >Nuevos ingresos en música</h3>
             <Books></Books>
          </section>
         <section className='carrusel' id='discosMasVendidos'>
-          <h3>Artistas mas populares</h3> 
+          <h3 className='h3layout' >Artistas mas populares</h3> 
           <Books></Books>
         </section>
         <section className='grid'>
-          <h3>Lo que dicen nuestros clientes</h3>
+          <h3 className='h3layout' >Lo que dicen nuestros clientes</h3>
           <Reviews/>
         </section>
       </main>
