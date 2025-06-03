@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useCart } from '../../context/CartContext';
 
@@ -11,11 +11,21 @@ const Cart = ({ isOpen, onClose }) => {
     getItemCount 
   } = useCart();
 
+  const [stockMessage, setStockMessage] = useState('');
+
   const getImageUrl = (item) => {
     if (Array.isArray(item.urlImage)) {
       return item.urlImage[0];
     }
     return item.image || item.img_url || item.urlImage;
+  };
+
+  const handleQuantityChange = (item, newQuantity) => {
+    if (newQuantity > item.stock) {
+      setStockMessage(`Solo hay ${item.stock} unidades disponibles de ${item.title}`);
+      setTimeout(() => setStockMessage(''), 3000);
+    }
+    updateQuantity(item.id, newQuantity);
   };
 
   return (
@@ -27,6 +37,10 @@ const Cart = ({ isOpen, onClose }) => {
         </CartHeader>
 
         <CartContent>
+          {stockMessage && (
+            <StockWarning>{stockMessage}</StockWarning>
+          )}
+          
           {cartItems.length === 0 ? (
             <EmptyCart>Tu carrito está vacío</EmptyCart>
           ) : (
@@ -50,17 +64,19 @@ const Cart = ({ isOpen, onClose }) => {
                       <ItemPrice>${item.price}</ItemPrice>
                       <QuantityControls>
                         <QuantityButton 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => handleQuantityChange(item, item.quantity - 1)}
                         >
                           -
                         </QuantityButton>
                         <QuantityDisplay>{item.quantity}</QuantityDisplay>
                         <QuantityButton 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                          disabled={item.quantity >= item.stock}
                         >
                           +
                         </QuantityButton>
                       </QuantityControls>
+                      <StockInfo>Stock disponible: {item.stock}</StockInfo>
                     </ItemDetails>
                   </ItemContent>
                 </CartItem>
@@ -277,6 +293,22 @@ const Overlay = styled.div`
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+`;
+
+const StockWarning = styled.div`
+  background-color: #ff4444;
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
+`;
+
+const StockInfo = styled.span`
+  color: #808080;
+  font-size: 0.8rem;
+  margin-top: 5px;
 `;
 
 export default Cart; 

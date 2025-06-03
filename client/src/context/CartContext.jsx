@@ -35,9 +35,14 @@ export const CartProvider = ({ children }) => {
     if (newQuantity < 1) return;
     
     setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
+      prevItems.map(item => {
+        if (item.id === itemId) {
+          // Validamos que la nueva cantidad no supere el stock
+          const validQuantity = Math.min(newQuantity, item.stock);
+          return { ...item, quantity: validQuantity };
+        }
+        return item;
+      })
     );
   };
 
