@@ -7,6 +7,8 @@ import Header from './components/Header/Header'
 import Footer from './components/Footer/Footer'
 import Cart from './components/Cart/Cart'
 import { CartProvider } from './context/CartContext'
+import BooksPage from './pages/BooksPage'
+import AlbumsPage from './pages/AlbumsPage'
 //import ProductCard from './components/ProductCard/ProductCard'
 //se puede sacar el ProductGrid
 function App() {
@@ -20,6 +22,8 @@ function App() {
         </Route>
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/albums" element={<AlbumsPage />} />
+        <Route path="/books" element={<BooksPage />} />
       </Routes>
       <Footer />
     </CartProvider>

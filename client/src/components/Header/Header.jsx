@@ -40,10 +40,10 @@ const Header = () => {
         <NavItem>
           <Link to="/register">Registrarse</Link>
         </NavItem>
-        <CartButton onClick={toggleCart}>
+        <CartContainer onClick={toggleCart}>
           <ShoppCartIcon />
           <CartCount>({getItemCount()})</CartCount>
-        </CartButton>
+        </CartContainer>
       </Nav>
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </HeaderContainer>
@@ -103,16 +103,14 @@ const NavItem = styled.div`
   }
 `;
 
-const CartButton = styled.button`
-  background: none;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
+const CartContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
   padding: 0.5rem;
   transition: all 0.3s ease;
+  color: #ffffff;
 
   &:hover {
     color: #00ff00;

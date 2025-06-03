@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -15,10 +16,15 @@ const RegisterPage = () => {
     email: '',
     password: ''
   });
+
   const [touched, setTouched] = useState({
     email: false,
     password: false
   });
+
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const URL = 'http://localhost:8080/auth/register';
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -76,7 +82,6 @@ const RegisterPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validar todo antes de enviar
     const emailError = !validateEmail(formData.email) ? 'Por favor, ingresa un email válido' : '';
     const passwordError = validatePassword(formData.password);
 
@@ -84,6 +89,7 @@ const RegisterPage = () => {
       email: emailError,
       password: passwordError
     });
+    
     setTouched({
       email: true,
       password: true
@@ -93,14 +99,61 @@ const RegisterPage = () => {
       return;
     }
 
-    // Aquí irá la lógica para enviar los datos al backend
-    console.log('Datos del formulario:', formData);
+    fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ...formData,
+        role: 'BUYER'
+      })
+    })
+      .then(async response => {
+        const responseText = await response.text();
+        
+        try {
+          const data = JSON.parse(responseText);
+          if (data.ok) {
+            setMessage({ 
+              type: 'success', 
+              text: '¡Registro exitoso! Redirigiendo al inicio...' 
+            });
+            setTimeout(() => {
+              navigate('/');
+            }, 2000);
+          } else {
+            setMessage({ 
+              type: 'error', 
+              text: data.error || 'Error al registrar usuario' 
+            });
+          }
+        } catch (error) {
+          console.error('Error al parsear la respuesta:', error);
+          setMessage({ 
+            type: 'error', 
+            text: 'Error en la respuesta del servidor' 
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error al hacer la petición:', error);
+        setMessage({ 
+          type: 'error', 
+          text: 'Error de conexión. Por favor, intenta más tarde.' 
+        });
+      });
   };
 
   return (
     <Container>
       <FormCard>
         <Title>Registro</Title>
+        {message.text && (
+          <MessageBox $type={message.type}>
+            {message.text}
+          </MessageBox>
+        )}
         <Form onSubmit={handleSubmit}>
           <InputGroup>
             <Label>Nombre de usuario</Label>
@@ -320,6 +373,16 @@ const RequirementList = styled.div`
 const Requirement = styled.span`
   color: ${props => props.$isMet ? '#00ff00' : '#a8a8a8'};
   transition: color 0.3s ease;
+`;
+
+const MessageBox = styled.div`
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  background-color: ${props => props.$type === 'success' ? '#4CAF50' : '#f44336'};
+  color: white;
+  font-weight: 500;
 `;
 
 export default RegisterPage; 
