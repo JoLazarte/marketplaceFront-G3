@@ -51,6 +51,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserProfile = async (updatedData) => {
+    try {
+      const response = await fetch('http://localhost:8080/users/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...updatedData,
+          role: user.role // Mantenemos el rol actual
+        })
+      });
+
+      const data = await response.json();
+      console.log('Respuesta de actualización:', data);
+
+      if (data.ok) {
+        // Actualizamos los datos del usuario en el estado y localStorage
+        const updatedUser = { ...user, ...updatedData };
+        localStorage.setItem('userData', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Error al actualizar el perfil' };
+      }
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      return { success: false, error: 'Error al conectar con el servidor' };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
@@ -63,7 +95,8 @@ export const AuthProvider = ({ children }) => {
       token, 
       user,
       login, 
-      logout, 
+      logout,
+      updateUserProfile,
       isAuthenticated: !!token 
     }}>
       {children}

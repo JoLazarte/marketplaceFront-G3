@@ -1,40 +1,198 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 const ProfilePage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, updateUserProfile } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    username: user?.username || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [changedFields, setChangedFields] = useState([]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Registrar campos modificados
+    if (value !== user[name] && !changedFields.includes(name)) {
+      setChangedFields([...changedFields, name]);
+    } else if (value === user[name] && changedFields.includes(name)) {
+      setChangedFields(changedFields.filter(field => field !== name));
+    }
+  };
+
+  const updateProfile = async () => {
+    if (!formData.password) {
+      setError('Debes ingresar tu contraseña actual para confirmar los cambios');
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+
+    const dataToUpdate = {
+      ...formData,
+      password: formData.password
+    };
+
+    const result = await updateUserProfile(dataToUpdate);
+    if (result.success) {
+      setSuccess('¡Perfil actualizado correctamente!');
+      setIsEditing(false);
+      setChangedFields([]);
+    } else {
+      setError(result.error);
+    }
+  };
+
+  const startEditing = () => {
+    setIsEditing(true);
+    setFormData({
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: ''
+    });
+    setChangedFields([]);
+    setError('');
+    setSuccess('');
+  };
+
   return (
     <Container>
       <Card>
-        <Title>Mi Perfil</Title>
+        <HeaderSection>
+          <Title>Mi Perfil</Title>
+          <EditButton onClick={isEditing ? () => setIsEditing(false) : startEditing}>
+            {isEditing ? 'Cancelar' : 'Editar Perfil'}
+          </EditButton>
+        </HeaderSection>
         <Content>
-          <InfoGroup>
-            <Label>Nombre de usuario</Label>
-            <Value>{user.username}</Value>
-          </InfoGroup>
-          
-          <InfoGroup>
-            <Label>Nombre</Label>
-            <Value>{user.firstName}</Value>
-          </InfoGroup>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {success && <SuccessMessage>{success}</SuccessMessage>}
 
-          <InfoGroup>
-            <Label>Apellido</Label>
-            <Value>{user.lastName}</Value>
-          </InfoGroup>
+          {isEditing && changedFields.length > 0 && (
+            <ChangeSummary>
+              <h3>Campos que se modificarán:</h3>
+              <ul>
+                {changedFields.map(field => (
+                  <li key={field}>
+                    {field === 'firstName' && 'Nombre'}
+                    {field === 'lastName' && 'Apellido'}
+                    {field === 'email' && 'Email'}
+                    {field === 'username' && 'Nombre de usuario'}
+                  </li>
+                ))}
+              </ul>
+            </ChangeSummary>
+          )}
 
-          <InfoGroup>
-            <Label>Email</Label>
-            <Value>{user.email}</Value>
-          </InfoGroup>
+          {isEditing && (
+            <PasswordWarning>
+              <strong>⚠️ Importante:</strong>
+              <ul>
+                <li>Si ingresas una nueva contraseña diferente a la actual, tu contraseña será actualizada.</li>
+              </ul>
+            </PasswordWarning>
+          )}
 
+          {isEditing ? (
+            <Form>
+              <InfoGroup>
+                <Label>Nombre de usuario</Label>
+                <Input
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Nombre de usuario"
+                />
+              </InfoGroup>
+              
+              <InfoGroup>
+                <Label>Nombre</Label>
+                <Input
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="Nombre"
+                />
+              </InfoGroup>
+
+              <InfoGroup>
+                <Label>Apellido</Label>
+                <Input
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Apellido"
+                />
+              </InfoGroup>
+
+              <InfoGroup>
+                <Label>Email</Label>
+                <Input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                />
+              </InfoGroup>
+
+              <InfoGroup>
+                <Label>Contraseña</Label>
+                <Input
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Ingresa tu contraseña actual o una nueva"
+                />
+              </InfoGroup>
+
+              <SaveButton onClick={updateProfile}>
+                Guardar Cambios
+              </SaveButton>
+            </Form>
+          ) : (
+            <>
+              <InfoGroup>
+                <Label>Nombre de usuario</Label>
+                <Value>{user.username}</Value>
+              </InfoGroup>
+              
+              <InfoGroup>
+                <Label>Nombre</Label>
+                <Value>{user.firstName}</Value>
+              </InfoGroup>
+
+              <InfoGroup>
+                <Label>Apellido</Label>
+                <Value>{user.lastName}</Value>
+              </InfoGroup>
+
+              <InfoGroup>
+                <Label>Email</Label>
+                <Value>{user.email}</Value>
+              </InfoGroup>
+            </>
+          )}
         </Content>
       </Card>
     </Container>
@@ -60,15 +218,99 @@ const Card = styled.div`
   max-width: 500px;
 `;
 
+const HeaderSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+`;
+
 const Title = styled.h1`
   color: #ffffff;
-  text-align: center;
-  margin-bottom: 2rem;
   font-size: 2rem;
+  margin: 0;
+`;
+
+const ChangeSummary = styled.div`
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #00ff00;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin: 0.2rem 0;
+  }
+`;
+
+const PasswordWarning = styled.div`
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #ffc107;
+
+  strong {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin: 0.2rem 0;
+  }
+`;
+
+const EditButton = styled.button`
+  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+  color: #00ff00;
+  border: 1px solid #404040;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
+    border-color: #00ff00;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const SaveButton = styled(EditButton)`
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
 `;
 
 const Content = styled.div`
   color: #ffffff;
+`;
+
+const Form = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 
 const InfoGroup = styled.div`
@@ -93,6 +335,45 @@ const Value = styled.p`
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 500;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #404040;
+  background-color: #333333;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #00ff00;
+    box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.1);
+  }
+
+  &::placeholder {
+    color: #666666;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: #ff4444;
+  text-align: center;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: rgba(255, 68, 68, 0.1);
+  border-radius: 8px;
+`;
+
+const SuccessMessage = styled.div`
+  color: #00ff00;
+  text-align: center;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: rgba(0, 255, 0, 0.1);
+  border-radius: 8px;
 `;
 
 export default ProfilePage; 
