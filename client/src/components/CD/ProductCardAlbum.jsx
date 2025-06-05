@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 const ProductCardAlbum = ({item: {id, title, author, description, urlImage, price, year}}) => {
   return (
     <Container>
-      {/* Cambia 'album' por 'disc' aquí */}
       <Link to={`/detail/disc/${id}`} className='link-card'>
         <ImgContainer>
           <img src={urlImage[0]} alt={title} />

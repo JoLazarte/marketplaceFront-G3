@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       if (data.ok) {
         const { access_token, ...userData } = data.data;
         
-        // Guardamos el token
+       
         localStorage.setItem('token', access_token);
         setToken(access_token);
 
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({
           ...updatedData,
-          role: user.role // Mantenemos el rol actual
+          role: user.role //el rol no se cambia
         })
       });
 
@@ -69,8 +69,6 @@ export const AuthProvider = ({ children }) => {
       console.log('Respuesta de actualización:', data);
 
       if (data.ok) {
-        // Actualizamos los datos del usuario en el estado y localStorage
-        const updatedUser = { ...user, ...updatedData };
         localStorage.setItem('userData', JSON.stringify(updatedUser));
         setUser(updatedUser);
         return { success: true };

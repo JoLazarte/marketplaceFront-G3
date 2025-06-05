@@ -37,7 +37,6 @@ export const CartProvider = ({ children }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId) {
-          // Validamos que la nueva cantidad no supere el stock
           const validQuantity = Math.min(newQuantity, item.stock);
           return { ...item, quantity: validQuantity };
         }
