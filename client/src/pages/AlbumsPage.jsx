@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { albums } from '../components/CD/Albums';
-import ProductCardAlbum from '../components/CD/ProductCardAlbum';
+import { discs } from '../components/Disco/Discs';
+import ProductCardDiscs from '../components/Disco/ProductCardDiscs';
 
-const getAllGenres = (albums) => {
+const getAllGenres = (discs) => {
   const genres = new Set();
-  albums.forEach(album => album.genres.forEach(g => genres.add(g)));
+  discs.forEach(disc => disc.genres.forEach(g => genres.add(g)));
   return ['Todos', ...Array.from(genres)];
 };
 
@@ -17,22 +17,22 @@ const AlbumsPage = () => {
 
   // Simulación: más vendidos = primeros 3, promociones = precio < 25
   const filteredAlbums = useMemo(() => {
-    let filtered = albums;
+    let filtered = discs;
 
     if (genre !== 'Todos') {
-      filtered = filtered.filter(album => album.genres.includes(genre));
+      filtered = filtered.filter(disc => disc.genres.includes(genre));
     }
     if (search.trim() !== '') {
-      filtered = filtered.filter(album =>
-        album.title.toLowerCase().includes(search.toLowerCase()) ||
-        album.author.toLowerCase().includes(search.toLowerCase())
+      filtered = filtered.filter(disc =>
+        disc.title.toLowerCase().includes(search.toLowerCase()) ||
+        disc.author.toLowerCase().includes(search.toLowerCase())
       );
     }
     if (bestseller) {
       filtered = [...filtered].sort((a, b) => a.id - b.id).slice(0, 3);
     }
     if (promo) {
-      filtered = filtered.filter(album => album.price < 25);
+      filtered = filtered.filter(disc => disc.price < 25);
     }
     return filtered;
   }, [genre, search, bestseller, promo]);
@@ -67,7 +67,7 @@ const AlbumsPage = () => {
             Promociones
           </CheckboxLabel>
           <Select value={genre} onChange={e => setGenre(e.target.value)}>
-            {getAllGenres(albums).map(g => (
+            {getAllGenres(discs).map(g => (
               <option key={g} value={g}>{g}</option>
             ))}
           </Select>
@@ -77,7 +77,7 @@ const AlbumsPage = () => {
             <Empty>No se encontraron álbumes.</Empty>
           ) : (
             filteredAlbums.map(album => (
-              <ProductCardAlbum key={album.id} item={album} />
+              <ProductCardDiscs key={album.id} item={album} />
             ))
           )}
         </Grid>
