@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Cart from '../Cart/Cart';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import SearchBar from '../../assets/SearchBar';
 import ShoppCartIcon from '../../assets/ShoppCartIcon';
 import './Header.css';
@@ -10,9 +11,14 @@ import './Header.css';
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { getItemCount } = useCart();
+  const { isAuthenticated, logout } = useAuth();
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -34,12 +40,27 @@ const Header = () => {
         <NavItem>
           <Link to="/contact">Contacto</Link>
         </NavItem>
-        <NavItem>
-          <Link to="/login">Iniciar Sesión</Link>
-        </NavItem>
-        <NavItem>
-          <Link to="/register">Registrarse</Link>
-        </NavItem>
+        
+        {isAuthenticated ? (
+          <>
+            <NavItem>
+              <Link to="/profile">Mi Perfil</Link>
+            </NavItem>
+            <NavItem>
+              <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>
+            </NavItem>
+          </>
+        ) : (
+          <>
+            <NavItem>
+              <Link to="/login">Iniciar Sesión</Link>
+            </NavItem>
+            <NavItem>
+              <Link to="/register">Registrarse</Link>
+            </NavItem>
+          </>
+        )}
+        
         <CartContainer onClick={toggleCart}>
           <ShoppCartIcon />
           <CartCount>({getItemCount()})</CartCount>
@@ -100,6 +121,20 @@ const NavItem = styled.div`
     &:hover {
       color: #00ff00;
     }
+  }
+`;
+
+const LogoutButton = styled.button`
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+
+  &:hover {
+    color: #00ff00;
   }
 `;
 

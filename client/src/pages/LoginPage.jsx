@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,10 +20,16 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // mando datos al backend
-    console.log('Datos del formulario:', formData);
+    setError('');
+
+    const result = await login(formData.username, formData.password);
+    if (result.success) {
+      navigate('/');
+    } else {
+      setError(result.error);
+    }
   };
 
   return (
@@ -50,6 +60,10 @@ const LoginPage = () => {
               placeholder="Ingresa tu contraseña"
             />
           </InputGroup>
+
+          {error && (
+            <ErrorMessage>{error}</ErrorMessage>
+          )}
 
           <Button type="submit">Iniciar Sesión</Button>
         </Form>
@@ -147,6 +161,12 @@ const Button = styled.button`
   }
 `;
 
+const ErrorMessage = styled.div`
+  color: #ff4444;
+  text-align: center;
+  font-size: 0.9rem;
+`;
+
 const RegisterLink = styled.p`
   text-align: center;
   margin-top: 1.5rem;
@@ -163,4 +183,4 @@ const RegisterLink = styled.p`
   }
 `;
 
-export default LoginPage; 
+export default LoginPage
