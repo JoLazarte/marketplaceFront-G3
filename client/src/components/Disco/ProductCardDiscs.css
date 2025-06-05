@@ -1,12 +1,18 @@
-.container {
+.disco-card-container {
   width: 90%;
   padding: 10px;
   margin: 0 auto;
+  position: relative;
+  background: #222;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  min-height: 400px;
 }
 
-.container .link-card {
+.disco-card-container .link-card {
   text-decoration: none;
   color: inherit;
+  display: block;
 }
 
 .img-container {
@@ -14,6 +20,7 @@
   height: 300px;
   overflow: hidden;
   border-radius: 8px;
+  position: relative;
 }
 
 .img-container img {
@@ -44,6 +51,12 @@
   margin: 5px 0;
 }
 
+.record-label {
+  font-size: 0.9rem;
+  color: #808080;
+  margin: 2px 0;
+}
+
 .description {
   font-size: 0.9rem;
   color: #d4d4d4;
@@ -60,15 +73,13 @@
   color: #00ff00;
   margin: 10px 0;
   text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-} container.disabled {
+}
+
+.disco-card-container.disabled {
   opacity: 0.5;
   pointer-events: none;
   user-select: none;
   filter: grayscale(0.3);
-}
-
-.img-container {
-  position: relative;
 }
 
 .img-container.out-of-stock img {
@@ -91,16 +102,13 @@
   z-index: 2;
   text-shadow: 0 2px 8px #000;
 }
+
 /* --- BOTÓN EDITAR --- */
 .edit-btn-container {
   position: absolute;
   top: 14px;
   right: 14px;
   z-index: 10;
-}
-
-.container {
-  position: relative; /* Necesario para posicionar el botón */
 }
 
 .edit-btn {
@@ -128,4 +136,15 @@
 
 .edit-icon {
   font-size: 1.2rem;
+}
+.disco-card-container.disabled .edit-btn,
+.disco-card-container.disabled .edit-btn-container {
+  pointer-events: auto !important;
+  opacity: 1;
+}
+.disco-card-container.disabled .edit-btn,
+.disco-card-container.disabled .edit-btn-container {
+  pointer-events: auto !important;
+  opacity: 1;
+  filter: none;
 }

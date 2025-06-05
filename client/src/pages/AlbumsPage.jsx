@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { discs } from '../components/Disco/Discs';
+import { discs as albums } from '../components/Disco/Discs';
 import ProductCardDiscs from '../components/Disco/ProductCardDiscs';
+import { useNavigate } from 'react-router-dom';
 
-const getAllGenres = (discs) => {
+const getAllGenres = (albums) => {
   const genres = new Set();
-  discs.forEach(disc => disc.genres.forEach(g => genres.add(g)));
+  albums.forEach(album => album.genres.forEach(g => genres.add(g)));
   return ['Todos', ...Array.from(genres)];
 };
 
@@ -14,25 +15,26 @@ const AlbumsPage = () => {
   const [search, setSearch] = useState('');
   const [bestseller, setBestseller] = useState(false);
   const [promo, setPromo] = useState(false);
+  const navigate = useNavigate();
 
   // Simulación: más vendidos = primeros 3, promociones = precio < 25
   const filteredAlbums = useMemo(() => {
-    let filtered = discs;
+    let filtered = albums;
 
     if (genre !== 'Todos') {
-      filtered = filtered.filter(disc => disc.genres.includes(genre));
+      filtered = filtered.filter(album => album.genres.includes(genre));
     }
     if (search.trim() !== '') {
-      filtered = filtered.filter(disc =>
-        disc.title.toLowerCase().includes(search.toLowerCase()) ||
-        disc.author.toLowerCase().includes(search.toLowerCase())
+      filtered = filtered.filter(album =>
+        album.title.toLowerCase().includes(search.toLowerCase()) ||
+        album.author.toLowerCase().includes(search.toLowerCase())
       );
     }
     if (bestseller) {
       filtered = [...filtered].sort((a, b) => a.id - b.id).slice(0, 3);
     }
     if (promo) {
-      filtered = filtered.filter(disc => disc.price < 25);
+      filtered = filtered.filter(album => album.price < 25);
     }
     return filtered;
   }, [genre, search, bestseller, promo]);
@@ -44,33 +46,40 @@ const AlbumsPage = () => {
           <h1>Álbumes</h1>
         </Header>
         <BarraFiltros>
-          <SearchInput
-            type="text"
-            placeholder="Buscar por título o artista..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <CheckboxLabel>
-            <input
-              type="checkbox"
-              checked={bestseller}
-              onChange={e => setBestseller(e.target.checked)}
+          <Filtros>
+            <SearchInput
+              type="text"
+              placeholder="Buscar por título o artista..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
-            Más vendidos
-          </CheckboxLabel>
-          <CheckboxLabel>
-            <input
-              type="checkbox"
-              checked={promo}
-              onChange={e => setPromo(e.target.checked)}
-            />
-            Promociones
-          </CheckboxLabel>
-          <Select value={genre} onChange={e => setGenre(e.target.value)}>
-            {getAllGenres(discs).map(g => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </Select>
+            <CheckboxLabel>
+              <input
+                type="checkbox"
+                checked={bestseller}
+                onChange={e => setBestseller(e.target.checked)}
+              />
+              Más vendidos
+            </CheckboxLabel>
+            <CheckboxLabel>
+              <input
+                type="checkbox"
+                checked={promo}
+                onChange={e => setPromo(e.target.checked)}
+              />
+              Promociones
+            </CheckboxLabel>
+            <Select value={genre} onChange={e => setGenre(e.target.value)}>
+              {getAllGenres(albums).map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </Select>
+          </Filtros>
+          <AddButton
+            onClick={() => navigate('/album-form')}
+          >
+            + Agregar Álbum
+          </AddButton>
         </BarraFiltros>
         <Grid>
           {filteredAlbums.length === 0 ? (
@@ -123,6 +132,14 @@ const BarraFiltros = styled.div`
   gap: 1rem;
   align-items: center;
   margin-bottom: 2rem;
+  justify-content: space-between;
+`;
+
+const Filtros = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
 `;
 
 const SearchInput = styled.input`
@@ -158,6 +175,26 @@ const Select = styled.select`
   border-radius: 6px;
   padding: 0.5rem 1rem;
   font-size: 1rem;
+`;
+
+const AddButton = styled.button`
+  background: #181818;
+  color: #fff;
+  border: 2px solid #00ff00;
+  border-radius: 2rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0,255,0,0.08);
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-left: auto;
+  &:hover {
+    background: #00ff00;
+    color: #181818;
+    box-shadow: 0 6px 24px rgba(0,255,0,0.18);
+    border-color: #00ff00;
+  }
 `;
 
 const Grid = styled.div`

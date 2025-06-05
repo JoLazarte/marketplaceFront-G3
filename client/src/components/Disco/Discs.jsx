@@ -69,7 +69,20 @@ export const discs = [
         price: 25.99,
         stock: 10,
         urlImage: ["https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg"]
-    }
+    },
+        {
+    id: "6",
+    title: "Party Favors",
+    author: "Sir Chloe",
+    recordLabel: "Terrible Records",
+    year: 2020,
+    description: "El EP debut de Sir Chloe, con un sonido indie rock alternativo y letras introspectivas.",
+    isrc: "USTRE2000001",
+    genres: ["Indie Rock", "Alternativo"],
+    price: 19.99,
+    stock: 0,
+    urlImage: ["https://i.scdn.co/image/ab67616d0000b273912b00ae82d10a2a4cdc084e"]
+}
 ]
 
 var settings = {

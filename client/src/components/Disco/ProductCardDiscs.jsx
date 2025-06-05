@@ -1,91 +1,56 @@
 import React from 'react'
-import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import './ProductCardDiscs.css'
+import { FaRegEdit } from 'react-icons/fa';
 
-const ProductCardDiscs = ({item: {id, title, author, description, urlImage, price, year, recordLabel}}) => {
+const ProductCardDiscs = ({
+  item: { id, title, author, description, urlImage, price, year, recordLabel, stock }
+}) => {
+  const navigate = useNavigate();
+  const isOutOfStock = stock === 0;
+
+  const CardContent = (
+    <>
+      <div className={`img-container${isOutOfStock ? ' out-of-stock' : ''}`}>
+        <img src={urlImage[0]} alt={title} />
+        {isOutOfStock && <div className="stock-overlay">Sin stock</div>}
+      </div>
+      <div className={`details${isOutOfStock ? ' out-of-stock' : ''}`}>
+        <h3 className="title">{title}</h3>
+        <p className="author">{author}</p>
+        <p className="record-label">{recordLabel} {year && `- ${year}`}</p>
+        <p className="description">{description}</p>
+        <p className="price">${price}</p>
+      </div>
+    </>
+  );
+
   return (
-    <Container>
-      <Link to={`/detail/disc/${id}`} className='link-card'>
-        <ImgContainer>
-          <img src={urlImage[0]} alt={title} />
-        </ImgContainer>
-        <Details>
-          <Title>{title}</Title>
-          <Author>{author}</Author>
-          <RecordLabel>{recordLabel} - {year}</RecordLabel>
-          <Description>{description}</Description>
-          <Price>${price}</Price>
-        </Details>
-      </Link>
-    </Container>
+    <div className="disco-card-container">
+      <div className="edit-btn-container">
+        <button
+          className="edit-btn"
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(`/edit/album/${id}`);
+          }}
+          title="Editar"
+          type="button"
+        >
+          <FaRegEdit className="edit-icon" />
+          <span className="edit-text">Editar</span>
+        </button>
+      </div>
+      {isOutOfStock ? (
+        <div>{CardContent}</div>
+      ) : (
+        <Link to={`/detail/disc/${id}`} className="link-card">
+          {CardContent}
+        </Link>
+      )}
+    </div>
   )
 }
-
-const Container = styled.div`
-  width: 90%;
-  padding: 10px;
-  margin: 0 auto;
-  .link-card {
-    text-decoration: none;
-    color: inherit;
-  }
-`
-
-const ImgContainer = styled.div`
-  width: 100%;
-  height: 300px;
-  overflow: hidden;
-  border-radius: 8px;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
-`
-
-const Details = styled.div`
-  padding: 10px 0;
-  text-align: left;
-`
-
-const Title = styled.h3`
-  font-size: 1.2rem;
-  margin: 5px 0;
-  color: #ffffff;
-`
-
-const Author = styled.p`
-  font-size: 1rem;
-  color: #a8a8a8;
-  margin: 5px 0;
-`
-
-const RecordLabel = styled.p`
-  font-size: 0.9rem;
-  color: #808080;
-  margin: 2px 0;
-`
-
-const Description = styled.p`
-  font-size: 0.9rem;
-  color: #d4d4d4;
-  margin: 5px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`
-
-const Price = styled.p`
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #00ff00;
-  margin: 10px 0;
-  text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-`
 
 export default ProductCardDiscs

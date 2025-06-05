@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { books } from '../components/Book/Books';
 import ProductCardBook from '../components/Book/ProductCardBook';
+import { useNavigate } from 'react-router-dom'; // Agrega esto
 
 const getAllGenres = (books) => {
   const genres = new Set();
@@ -14,6 +15,7 @@ const BooksPage = () => {
   const [search, setSearch] = useState('');
   const [bestseller, setBestseller] = useState(false);
   const [promo, setPromo] = useState(false);
+  const navigate = useNavigate(); // Hook para redirección
 
   // Simulación: más vendidos = primeros 3, promociones = precio < 20
   const filteredBooks = useMemo(() => {
@@ -44,33 +46,40 @@ const BooksPage = () => {
           <h1>Libros</h1>
         </Header>
         <BarraFiltros>
-          <SearchInput
-            type="text"
-            placeholder="Buscar por título o autor..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <CheckboxLabel>
-            <input
-              type="checkbox"
-              checked={bestseller}
-              onChange={e => setBestseller(e.target.checked)}
+          <Filtros>
+            <SearchInput
+              type="text"
+              placeholder="Buscar por título o autor..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
-            Más vendidos
-          </CheckboxLabel>
-          <CheckboxLabel>
-            <input
-              type="checkbox"
-              checked={promo}
-              onChange={e => setPromo(e.target.checked)}
-            />
-            Promociones
-          </CheckboxLabel>
-          <Select value={genre} onChange={e => setGenre(e.target.value)}>
-            {getAllGenres(books).map(g => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </Select>
+            <CheckboxLabel>
+              <input
+                type="checkbox"
+                checked={bestseller}
+                onChange={e => setBestseller(e.target.checked)}
+              />
+              Más vendidos
+            </CheckboxLabel>
+            <CheckboxLabel>
+              <input
+                type="checkbox"
+                checked={promo}
+                onChange={e => setPromo(e.target.checked)}
+              />
+              Promociones
+            </CheckboxLabel>
+            <Select value={genre} onChange={e => setGenre(e.target.value)}>
+              {getAllGenres(books).map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </Select>
+          </Filtros>
+          <AddButton
+            onClick={() => navigate('/book-form')}
+          >
+            + Agregar Libro
+          </AddButton>
         </BarraFiltros>
         <Grid>
           {filteredBooks.length === 0 ? (
@@ -123,6 +132,14 @@ const BarraFiltros = styled.div`
   gap: 1rem;
   align-items: center;
   margin-bottom: 2rem;
+  justify-content: space-between;
+`;
+
+const Filtros = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
 `;
 
 const SearchInput = styled.input`
@@ -158,6 +175,26 @@ const Select = styled.select`
   border-radius: 6px;
   padding: 0.5rem 1rem;
   font-size: 1rem;
+`;
+
+const AddButton = styled.button`
+  background: #181818;
+  color: #fff;
+  border: 2px solid #00ff00;
+  border-radius: 2rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0,255,0,0.08);
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-left: auto;
+  &:hover {
+    background: #00ff00;
+    color: #181818;
+    box-shadow: 0 6px 24px rgba(0,255,0,0.18);
+    border-color: #00ff00;
+  }
 `;
 
 const Grid = styled.div`

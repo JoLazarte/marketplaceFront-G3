@@ -64,7 +64,19 @@ export const books = [
         price: 19.99,
         stock: 6,
         urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
-    }
+    },
+   {
+  id: "6",
+  title: "Fahrenheit 451",
+  author: "Ray Bradbury",
+  editorial: "Ballantine Books",
+  description: "Una novela distópica sobre un futuro donde los libros están prohibidos.",
+  isbn: "978-1234567890",
+  genreBooks: ["Ciencia ficción", "Aventura"],
+  urlImage: ["https://tienda.planetadelibros.com.ar/cdn/shop/products/D_782412-MLA41732242606_052020-O.jpg?v=1684360495"],
+  price: 10.22,
+  stock: 0
+}
 ]
 var settings = {
     dots: true,

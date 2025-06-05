@@ -11,6 +11,10 @@ import { CartProvider } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import BooksPage from './pages/BooksPage'
 import AlbumsPage from './pages/AlbumsPage'
+import AlbumForm from './pages/album-form';
+import BookForm from './pages/book-form';
+import EditBookForm from './pages/EditBookForm';
+import EditAlbumForm from './pages/EditAlbumForm'; 
 //import ProductCard from './components/ProductCard/ProductCard'
 //se puede sacar el ProductGrid
 const App = () => {
@@ -28,6 +32,11 @@ const App = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/albums" element={<AlbumsPage />} />
           <Route path="/books" element={<BooksPage />} />
+          <Route path="/album-form" element={<AlbumForm />} />
+          <Route path="/book-form" element={<BookForm />} />
+          <Route path="/edit/book/:id" element={<EditBookForm />} />
+          <Route path="/edit/album/:id" element={<EditAlbumForm />} />
+          
         </Routes>
         <Footer />
       </CartProvider>
