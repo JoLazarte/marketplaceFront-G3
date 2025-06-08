@@ -117,10 +117,10 @@ const RegisterPage = () => {
           if (data.ok) {
             setMessage({ 
               type: 'success', 
-              text: '¡Registro exitoso! Redirigiendo al inicio...' 
+              text: '¡Registro exitoso! Redirigiendo al inicio de sesión...' 
             });
             setTimeout(() => {
-              navigate('/');
+              navigate('/login');
             }, 2000);
           } else {
             setMessage({ 
