@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const RegisterPage = () => {
     lastName: '',
     email: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [errors, setErrors] = useState({
     email: '',
@@ -145,6 +148,10 @@ const RegisterPage = () => {
       });
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <Container>
       <FormCard>
@@ -169,16 +176,25 @@ const RegisterPage = () => {
 
           <InputGroup>
             <Label>Contraseña</Label>
-            <Input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
-              placeholder="Ingresa tu contraseña"
-              $hasError={touched.password && !!errors.password}
-            />
+            <PasswordInputContainer>
+              <PasswordInput
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                placeholder="Ingresa tu contraseña"
+                $hasError={touched.password && !!errors.password}
+              />
+              <TogglePasswordButton
+                type="button"
+                onClick={togglePasswordVisibility}
+                title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </TogglePasswordButton>
+            </PasswordInputContainer>
             {touched.password && errors.password && (
               <ErrorMessage>{errors.password}</ErrorMessage>
             )}
@@ -383,6 +399,40 @@ const MessageBox = styled.div`
   background-color: ${props => props.$type === 'success' ? '#4CAF50' : '#f44336'};
   color: white;
   font-weight: 500;
+`;
+
+const PasswordInputContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+const PasswordInput = styled(Input)`
+  padding-right: 40px;
+  width: 100%;
+`;
+
+const TogglePasswordButton = styled.button`
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #666666;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #00ff00;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 export default RegisterPage; 

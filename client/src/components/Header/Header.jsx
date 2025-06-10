@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Cart from '../Cart/Cart';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import SearchBar from '../../assets/SearchBar';
 import ShoppCartIcon from '../../assets/ShoppCartIcon';
+import { FaUser } from 'react-icons/fa';
 import './Header.css';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { getItemCount } = useCart();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
+  const navigate = useNavigate();
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
@@ -19,6 +22,16 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
+    setShowUserMenu(false);
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
+  const handleProfileClick = () => {
+    setShowUserMenu(false);
+    navigate('/profile');
   };
 
   return (
@@ -41,15 +54,29 @@ const Header = () => {
           <Link to="/contact">Contacto</Link>
         </NavItem>
         
-        {isAuthenticated ? (
-          <>
-            <NavItem>
-              <Link to="/profile">Mi Perfil</Link>
-            </NavItem>
-            <NavItem>
-              <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>
-            </NavItem>
-          </>
+        {isAuthenticated() ? (
+          <UserSection>
+            <UserButton onClick={toggleUserMenu}>
+              <FaUser />
+              <span>{user.firstName}</span>
+            </UserButton>
+            {showUserMenu && (
+              <UserMenu>
+                <UserInfo>
+                  <strong>{user.firstName} {user.lastName}</strong>
+                  <small>{user.email}</small>
+                </UserInfo>
+                <MenuDivider />
+                <MenuItem onClick={handleProfileClick}>
+                  Mi Perfil
+                </MenuItem>
+                <MenuDivider />
+                <MenuItem as="button" onClick={handleLogout}>
+                  Cerrar Sesión
+                </MenuItem>
+              </UserMenu>
+            )}
+          </UserSection>
         ) : (
           <>
             <NavItem>
@@ -124,16 +151,82 @@ const NavItem = styled.div`
   }
 `;
 
-const LogoutButton = styled.button`
+const UserSection = styled.div`
+  position: relative;
+`;
+
+const UserButton = styled.button`
   background: none;
   border: none;
   color: #ffffff;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
-  transition: color 0.3s ease;
-  padding: 0;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 
   &:hover {
+    color: #00ff00;
+    background: rgba(0, 255, 0, 0.1);
+  }
+
+  svg {
+    font-size: 1.2rem;
+  }
+`;
+
+const UserMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #242424;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 8px;
+  z-index: 1000;
+`;
+
+const UserInfo = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    color: #ffffff;
+  }
+
+  small {
+    color: #808080;
+  }
+`;
+
+const MenuDivider = styled.hr`
+  border: none;
+  border-top: 1px solid #404040;
+  margin: 8px 0;
+`;
+
+const MenuItem = styled.a`
+  display: block;
+  padding: 8px 16px;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+
+  &:hover {
+    background: rgba(0, 255, 0, 0.1);
     color: #00ff00;
   }
 `;

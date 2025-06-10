@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = ({ isOpen, onClose }) => {
+  const { canViewCart, role } = useAuth();
+  const navigate = useNavigate();
   const { 
     cartItems, 
     removeFromCart, 
@@ -11,7 +15,11 @@ const Cart = ({ isOpen, onClose }) => {
     getItemCount 
   } = useCart();
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [stockMessage, setStockMessage] = useState('');
+
+  // Si el usuario no puede ver el carrito, no renderizamos nada
+  if (!canViewCart()) return null;
 
   const getImageUrl = (item) => {
     if (Array.isArray(item.urlImage)) {
@@ -26,6 +34,31 @@ const Cart = ({ isOpen, onClose }) => {
       setTimeout(() => setStockMessage(''), 3000);
     }
     updateQuantity(item.id, newQuantity);
+  };
+
+  const handleCheckout = () => {
+    if (role === 'BUYER_NO_REGISTRADO') {
+      setShowLoginModal(true);
+    } else {
+      // Aquí iría la lógica para proceder al pago
+      console.log('Procediendo al pago...');
+    }
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(false); // Cerramos el modal de login
+    onClose(); // Cerramos el carrito
+    setTimeout(() => {
+      navigate('/login'); // Navegamos a la página de login después de un pequeño delay
+    }, 100);
+  };
+
+  const handleRegisterClick = () => {
+    setShowLoginModal(false); // Cerramos el modal de login
+    onClose(); // Cerramos el carrito
+    setTimeout(() => {
+      navigate('/register'); // Navegamos a la página de registro después de un pequeño delay
+    }, 100);
   };
 
   return (
@@ -86,7 +119,7 @@ const Cart = ({ isOpen, onClose }) => {
                 <Total>
                   Total: ${getCartTotal().toFixed(2)}
                 </Total>
-                <CheckoutButton>
+                <CheckoutButton onClick={handleCheckout}>
                   Proceder al pago
                 </CheckoutButton>
               </CartFooter>
@@ -94,6 +127,21 @@ const Cart = ({ isOpen, onClose }) => {
           )}
         </CartContent>
       </CartModal>
+
+      {showLoginModal && (
+        <>
+          <LoginModal>
+            <h3>¡Necesitas una cuenta para continuar!</h3>
+            <p>Para completar tu compra, necesitas iniciar sesión o registrarte.</p>
+            <LoginModalButtons>
+              <ActionButton onClick={handleLoginClick}>Iniciar Sesión</ActionButton>
+              <ActionButton onClick={handleRegisterClick}>Registrarse</ActionButton>
+              <CancelButton onClick={() => setShowLoginModal(false)}>Cancelar</CancelButton>
+            </LoginModalButtons>
+          </LoginModal>
+          <Overlay onClick={() => setShowLoginModal(false)} />
+        </>
+      )}
 
       {isOpen && <Overlay onClick={onClose} />}
     </>
@@ -309,6 +357,61 @@ const StockInfo = styled.span`
   color: #808080;
   font-size: 0.8rem;
   margin-top: 5px;
+`;
+
+const LoginModal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #242424;
+  padding: 30px;
+  border-radius: 8px;
+  z-index: 1002;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  color: #ffffff;
+
+  h3 {
+    margin-top: 0;
+    color: #00ff00;
+  }
+
+  p {
+    margin: 20px 0;
+  }
+`;
+
+const LoginModalButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+`;
+
+const ActionButton = styled.button`
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  background: #00ff00;
+  color: #000000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #00cc00;
+  }
+`;
+
+const CancelButton = styled(ActionButton)`
+  background: #404040;
+  color: #ffffff;
+
+  &:hover {
+    background: #505050;
+  }
 `;
 
 export default Cart; 

@@ -63,7 +63,7 @@ export const books = [
         genreBooks: ["Ficción experimental", "Literatura latinoamericana"],
         price: 19.99,
         stock: 6,
-        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
+        urlImage: ["https://tienda.planetadelibros.com.ar/cdn/shop/products/D_782412-MLA41732242606_052020-O.jpg?v=1684360495"]
     },
    {
   id: "6",

@@ -2,12 +2,14 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './ProductCardDiscs.css'
 import { FaRegEdit } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
 const ProductCardDiscs = ({
   item: { id, title, author, description, urlImage, price, year, recordLabel, stock }
 }) => {
   const navigate = useNavigate();
   const isOutOfStock = stock === 0;
+  const { canEditProducts } = useAuth();
 
   const CardContent = (
     <>
@@ -27,21 +29,23 @@ const ProductCardDiscs = ({
 
   return (
     <div className="disco-card-container">
-      <div className="edit-btn-container">
-        <button
-          className="edit-btn"
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            navigate(`/edit/album/${id}`);
-          }}
-          title="Editar"
-          type="button"
-        >
-          <FaRegEdit className="edit-icon" />
-          <span className="edit-text">Editar</span>
-        </button>
-      </div>
+      {canEditProducts() && (
+        <div className="edit-btn-container">
+          <button
+            className="edit-btn"
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate(`/edit/album/${id}`);
+            }}
+            title="Editar"
+            type="button"
+          >
+            <FaRegEdit className="edit-icon" />
+            <span className="edit-text">Editar</span>
+          </button>
+        </div>
+      )}
       {isOutOfStock ? (
         <div>{CardContent}</div>
       ) : (

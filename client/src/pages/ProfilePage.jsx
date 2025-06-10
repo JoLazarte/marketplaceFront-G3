@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -7,18 +7,32 @@ const ProfilePage = () => {
   const { isAuthenticated, user, updateUserProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: user?.username || '',
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    password: ''
+    username: '',
+    firstName: '',
+    lastName: '',
+    email: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [changedFields, setChangedFields] = useState([]);
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || ''
+      });
+    }
+  }, [user]);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
+  }
+
+  if (!user) {
+    return <div>Cargando...</div>;
   }
 
   const handleChange = (e) => {
@@ -37,20 +51,17 @@ const ProfilePage = () => {
   };
 
   const updateProfile = async () => {
-    if (!formData.password) {
-      setError('Debes ingresar tu contraseña actual para confirmar los cambios');
-      return;
-    }
-
     setError('');
     setSuccess('');
 
-    const dataToUpdate = {
-      ...formData,
-      password: formData.password
-    };
+    // Excluimos el username de los datos a actualizar
+    const { username, ...dataToUpdate } = formData;
 
-    const result = await updateUserProfile(dataToUpdate);
+    const result = await updateUserProfile({
+      ...dataToUpdate,
+      password: "null"
+    });
+    
     if (result.success) {
       setSuccess('¡Perfil actualizado correctamente!');
       setIsEditing(false);
@@ -66,8 +77,7 @@ const ProfilePage = () => {
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
-      password: ''
+      email: user.email
     });
     setChangedFields([]);
     setError('');
@@ -103,15 +113,6 @@ const ProfilePage = () => {
             </ChangeSummary>
           )}
 
-          {isEditing && (
-            <PasswordWarning>
-              <strong>⚠️ Importante:</strong>
-              <ul>
-                <li>Si ingresas una nueva contraseña diferente a la actual, tu contraseña será actualizada.</li>
-              </ul>
-            </PasswordWarning>
-          )}
-
           {isEditing ? (
             <Form>
               <InfoGroup>
@@ -119,9 +120,17 @@ const ProfilePage = () => {
                 <Input
                   name="username"
                   value={formData.username}
-                  onChange={handleChange}
+                  disabled
+                  style={{
+                    backgroundColor: '#2a2a2a',
+                    cursor: 'not-allowed',
+                    opacity: 0.7
+                  }}
                   placeholder="Nombre de usuario"
                 />
+                <small style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                  El nombre de usuario no se puede modificar
+                </small>
               </InfoGroup>
               
               <InfoGroup>
@@ -152,17 +161,6 @@ const ProfilePage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
-                />
-              </InfoGroup>
-
-              <InfoGroup>
-                <Label>Contraseña</Label>
-                <Input
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Ingresa tu contraseña actual o una nueva"
                 />
               </InfoGroup>
 
@@ -241,28 +239,6 @@ const ChangeSummary = styled.div`
   h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1rem;
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 1.5rem;
-  }
-
-  li {
-    margin: 0.2rem 0;
-  }
-`;
-
-const PasswordWarning = styled.div`
-  background: rgba(255, 193, 7, 0.1);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  color: #ffc107;
-
-  strong {
-    display: block;
-    margin-bottom: 0.5rem;
   }
 
   ul {
