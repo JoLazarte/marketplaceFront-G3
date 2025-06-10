@@ -15,6 +15,7 @@ import AlbumForm from './pages/album-form';
 import BookForm from './pages/book-form';
 import EditBookForm from './pages/EditBookForm';
 import EditAlbumForm from './pages/EditAlbumForm'; 
+import Contact from './pages/Contact';
 //import ProductCard from './components/ProductCard/ProductCard'
 //se puede sacar el ProductGrid
 const App = () => {
@@ -36,6 +37,8 @@ const App = () => {
           <Route path="/book-form" element={<BookForm />} />
           <Route path="/edit/book/:id" element={<EditBookForm />} />
           <Route path="/edit/album/:id" element={<EditAlbumForm />} />
+          <Route path="/contact" element={<Contact />} />
+          
           
         </Routes>
         <Footer />
