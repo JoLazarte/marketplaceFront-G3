@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Cart from '../Cart/Cart';
@@ -6,7 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import SearchBar from '../../assets/SearchBar';
 import ShoppCartIcon from '../../assets/ShoppCartIcon';
-import './Header.css';
+
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -72,7 +72,7 @@ const Header = () => {
 };
 
 const HeaderContainer = styled.header`
-  background-color: #242424;
+  background-color: var(--primary-color);
   padding: 1rem 2rem;
   position: fixed;
   top: 0;
@@ -83,6 +83,12 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 1rem;
+    align-items: flex-start;
+  }
 `;
 
 const Logo = styled.div`
@@ -90,11 +96,16 @@ const Logo = styled.div`
   font-weight: bold;
 
   a {
-    color: #00ff00;
+    font-color:var(--primary-color);
     text-decoration: none;
-    
     &:hover {
-      text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      text-shadow: 0 0 10px #ffffff;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo-text {
+      font-size: 1.2rem;
     }
   }
 `;
@@ -103,12 +114,25 @@ const SearchBarContainer = styled.div`
   flex: 1;
   max-width: 600px;
   margin: 0 2rem;
+
+  @media (max-width: 768px) {
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 const Nav = styled.nav`
   display: flex;
   gap: 2rem;
   align-items: center;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 1rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
 `;
 
 const NavItem = styled.div`

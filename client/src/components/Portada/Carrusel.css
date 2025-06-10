@@ -8,52 +8,52 @@
 }
 
 .slide {
- 
   width: 100%;
   height: 600px;
   transition: transform .8s ease-in-out;
- 
 }
 
 .slide-hidden {
   display: none;
 }
-.imgCarrusel{
+
+.imgCarrusel {
   position: absolute;
   width: 100%;
   height: 630px;
   object-fit: cover;
 }
-.insideCard{
-    position: absolute;
-    color:white;
-    margin-top: 7rem;
-    margin-left: 36%;
-    padding: 1.6rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-    border: 1.5px solid rgba(255,255,255,0.18);
-    backdrop-filter: blur(4px);
-    color: #fff;
-    background: rgba(26, 24, 24, 0.671);
-    border-radius: 1rem;
-    width: 500px;
-    translate: middle;
-    text-align: center;
-   
+
+.insideCard {
+  position: absolute;
+  color: white;
+  margin-top: 7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1.6rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(4px);
+  background: rgba(26, 24, 24, 0.671);
+  border-radius: 1rem;
+  width: 500px;
+  text-align: center;
 }
-.btnInsideCard{
+
+.btnInsideCard {
   border-radius: 2rem; 
   padding: 0.4rem 0.9rem;
   color: #18191a;
   font-weight: 700;
 }
+
 .arrow {
-  position:absolute;
+  position: absolute;
   filter: drop-shadow(0px 0px 5px #b2acac);
   width: 2.1rem;
   height: 2.1rem;
   color: rgb(242, 236, 236);
-
+  opacity: 0.8;
 }
 
 .arrow:hover {
@@ -72,6 +72,8 @@
   display: flex;
   position: absolute;
   bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
   transition: all 800ms ease-in-out;
 }
 
@@ -89,4 +91,48 @@
 
 .indicator-inactive {
   background-color: grey;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+  .carousel, .slide {
+    height: 400px;
+  }
+  .imgCarrusel {
+    height: 400px;
+  }
+  .insideCard {
+    width: 320px;
+    margin-top: 3rem;
+    padding: 1rem;
+  }
+  .arrow-left {
+    left: 1rem;
+  }
+  .arrow-right {
+    right: 1rem;
+  }
+  .arrow {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .carousel, .slide {
+    height: 250px;
+  }
+  .imgCarrusel {
+    height: 250px;
+  }
+  .insideCard {
+    width: 90vw;
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .arrow {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
 }

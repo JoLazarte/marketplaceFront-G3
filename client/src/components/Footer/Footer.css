@@ -1,10 +1,14 @@
-footer {
+.footer {
 
-  padding:160px 0px;
+  padding:50px 0px;
   color: rgb(240, 245, 255);
- background-color: #625f5f;
+ background-color: #7A4A27;
 }
-
+.footer-container {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding : 0 70px;
+}
 .footer-btns{
   margin-right: -8rem;
 }

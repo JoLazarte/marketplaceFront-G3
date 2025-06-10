@@ -1,3 +1,15 @@
+#root {
+   --primary-color: #6A858A;
+   --secondary-color: #7F00FF;
+   --accent-color: #00ff00;
+   --font-family: 'Arial', sans-serif;
+   --text-color: #333333;
+   --white: #FFFFFF;
+
+   --black: #000000;
+   background-color: #D6E6F2;
+   
+}
 
 
 * {
@@ -8,10 +20,3 @@
    
 }
 
-body{
-   background-color: #121212;
-   color: #fff;
- 
-   overflow-x: hidden;
-    
-}
