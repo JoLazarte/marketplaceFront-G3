@@ -1,10 +1,13 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import './ProductCardBook.css'
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './ProductCardBook.css';
 import { FaRegEdit } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
-const ProductCardBook = ({item: {id, title, author, editorial, description, urlImage, price, stock}}) => {
+const ProductCardBook = ({ item }) => {
+  if (!item) return null;
+  const { id, title, author, description, urlImage, price, stock } = item;
+  
   const isOutOfStock = stock === 0;
   const navigate = useNavigate();
   const { canEditProducts } = useAuth();
@@ -18,7 +21,7 @@ const ProductCardBook = ({item: {id, title, author, editorial, description, urlI
       <div className="details">
         <h3 className="title">{title}</h3>
         <p className="author">{author}</p>
-        <p className="editorial">{editorial}</p>
+        <p className="editorial">{item.editorial}</p>
         <p className="description">{description}</p>
         <p className="price">${price}</p>
       </div>
@@ -52,7 +55,7 @@ const ProductCardBook = ({item: {id, title, author, editorial, description, urlI
         </Link>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductCardBook
+export default ProductCardBook;

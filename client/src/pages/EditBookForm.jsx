@@ -1,70 +1,104 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
-import { books } from '../components/Book/Books';
 
-// Obtener géneros únicos de los libros existentes
-const getAllGenres = (books) => {
-  const genres = new Set();
-  books.forEach(book => book.genreBooks.forEach(g => genres.add(g)));
-  return Array.from(genres);
-};
+// Enum de géneros según tu backend (ajusta si es necesario)
+const GENRE_BOOKS = [
+  "FANTASY", "FAIRY_TALE", "FICCION", "FABLE", "VERSE", "FOLKLORE", "HISTORICAL", "THRILLER", "HORROR",
+  "ADVENTURE", "ROMANCE", "DRAMA", "LGBTQ", "ADULT", "CHILDREN", "YOUNG", "CLASSIC", "EPIC", "METAFICTION",
+  "PHILOSOPHICAL", "POSTMODERN", "RELIGIOUS", "MAGICALREALISM", "SATIRE", "POLITICAL", "EROTIC", "WESTERN",
+  "URBAN", "COMEDY", "PARODY", "DARK_COMEDY", "DYSTOPIA", "SCI_FI", "SURREAL", "TALE", "TRAGICOMEDY", "CRIME",
+  "MANGA", "COMIC", "SUPERNATURAL", "PSYCHOLOGICAL", "ACADEMIC", "BIOGRAPHY", "BIBLIOGRAPHY", "COOKBOOK",
+  "JOURNALISTIC", "ART", "ANTINOVEL"
+];
+
+const API_URL = 'http://localhost:8080/books';
 
 const EditBookForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const book = books.find(b => b.id === id);
 
-  // Si no se encuentra el libro, muestra mensaje
-  if (!book) return <div>Libro no encontrado</div>;
-
-  const [form, setForm] = useState({
-    title: book.title || '',
-    author: book.author || '',
-    recordLabel: book.editorial || '',
-    year: book.year || '',
-    description: book.description || '',
-    isrc: book.isrc || '',
-    genres: book.genreBooks || [],
-    price: book.price || '',
-    stock: book.stock || '',
-    urlImage: book.urlImage ? book.urlImage[0] : ''
-  });
+  const [form, setForm] = useState(null);
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
-  const genresList = getAllGenres(books);
+  const [loading, setLoading] = useState(true);
 
-  // Refs para scroll automático a errores
   const refs = {
     title: useRef(null),
     author: useRef(null),
-    recordLabel: useRef(null),
-    year: useRef(null),
+    editorial: useRef(null),
     description: useRef(null),
-    isrc: useRef(null),
-    genres: useRef(null),
+    isbn: useRef(null),
+    genreBooks: useRef(null),
     price: useRef(null),
     stock: useRef(null),
     urlImage: useRef(null)
   };
 
-  // Validación de campos
+  // --- GET: Cargar datos del libro ---
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const res = await fetch(`${API_URL}/${id}`);
+        const responseText = await res.text();
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}\nResponse: ${responseText}`);
+        }
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error(`Invalid JSON response: ${responseText}`);
+        }
+        if (!data.ok) {
+          throw new Error(data.error || 'No se encontró el libro');
+        }
+        const book = data.data;
+        if (!book) {
+          throw new Error('No hay datos del libro en la respuesta');
+        }
+        setForm({
+          id: book.id,
+          title: book.title || '',
+          author: book.author || '',
+          editorial: book.editorial || '',
+          description: book.description || '',
+          isbn: book.isbn || '',
+          genreBooks: book.genreBooks || [],
+          price: book.price || '',
+          stock: book.stock || '',
+          urlImage: book.urlImage || ''
+        });
+        setLoading(false);
+      } catch (err) {
+        setForm(null);
+        setLoading(false);
+      }
+    };
+    if (id) fetchBook();
+    else {
+      setLoading(false);
+      setForm(null);
+    }
+  }, [id]);
+
+  // --- Validación ---
   const validate = (fields = form) => {
     const newErrors = {};
-    if (!fields.title.trim()) newErrors.title = 'El título es obligatorio';
-    if (!fields.author.trim()) newErrors.author = 'El autor es obligatorio';
-    if (!fields.recordLabel.trim()) newErrors.recordLabel = 'La editorial es obligatoria';
-    if (!fields.year || isNaN(fields.year) || Number(fields.year) < 0) newErrors.year = 'Año inválido';
-    if (!fields.description.trim()) newErrors.description = 'La descripción es obligatoria';
-    if (!fields.isrc.trim()) newErrors.isrc = 'El ISRC es obligatorio';
-    if (!fields.genres.length) newErrors.genres = 'Selecciona al menos un género';
+    if (!fields.title?.trim()) newErrors.title = 'El título es obligatorio';
+    if (!fields.author?.trim()) newErrors.author = 'El autor es obligatorio';
+    if (!fields.editorial?.trim()) newErrors.editorial = 'La editorial es obligatoria';
+    if (!fields.description?.trim()) newErrors.description = 'La descripción es obligatoria';
+    if (!fields.isbn?.trim()) newErrors.isbn = 'El ISBN es obligatorio';
+    if (!fields.genreBooks?.length) newErrors.genreBooks = 'Selecciona al menos un género';
     if (!fields.price || isNaN(fields.price) || Number(fields.price) <= 0) newErrors.price = 'Precio inválido';
     if (!fields.stock || isNaN(fields.stock) || Number(fields.stock) < 0) newErrors.stock = 'Stock inválido';
-    if (!fields.urlImage.trim() || !/^https?:\/\/.+\..+/.test(fields.urlImage)) newErrors.urlImage = 'URL de imagen inválida';
+    if (!fields.urlImage?.trim() || !/^https?:\/\/.+\..+/.test(fields.urlImage)) newErrors.urlImage = 'URL de imagen inválida';
     return newErrors;
   };
 
+  // --- Handlers ---
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -72,18 +106,17 @@ const EditBookForm = () => {
     setErrors(validate({ ...form, [name]: value }));
   };
 
-  // Manejo especial para géneros múltiples con checkboxes
   const handleGenreCheckbox = (e) => {
     const { value, checked } = e.target;
     let newGenres;
     if (checked) {
-      newGenres = [...form.genres, value];
+      newGenres = [...(form.genreBooks || []), value];
     } else {
-      newGenres = form.genres.filter(g => g !== value);
+      newGenres = (form.genreBooks || []).filter(g => g !== value);
     }
-    setForm(prev => ({ ...prev, genres: newGenres }));
-    setTouched(prev => ({ ...prev, genres: true }));
-    setErrors(validate({ ...form, genres: newGenres }));
+    setForm(prev => ({ ...prev, genreBooks: newGenres }));
+    setTouched(prev => ({ ...prev, genreBooks: true }));
+    setErrors(validate({ ...form, genreBooks: newGenres }));
   };
 
   const handleBlur = e => {
@@ -91,24 +124,61 @@ const EditBookForm = () => {
     setErrors(validate(form));
   };
 
-  const handleSubmit = e => {
+  // --- PUT: Enviar datos editados al backend ---
+  const handleSubmit = async e => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
     setTouched({
-      title: true, author: true, recordLabel: true, year: true, description: true,
-      isrc: true, genres: true, price: true, stock: true, urlImage: true
+      title: true, author: true, editorial: true, description: true,
+      isbn: true, genreBooks: true, price: true, stock: true, urlImage: true
     });
 
     if (Object.keys(validationErrors).length === 0) {
-      // Aquí iría la lógica para enviar los datos editados al backend
-      alert('Libro editado (simulado)');
-      navigate('/books');
+      try {
+        const dto = {
+          id: form.id,
+          title: form.title.trim(),
+          author: form.author.trim(),
+          editorial: form.editorial.trim(),
+          description: form.description.trim(),
+          isbn: form.isbn.trim(),
+          genreBooks: form.genreBooks, // Array de strings exactos del enum
+          price: Number(form.price),
+          stock: Number(form.stock),
+          urlImage: form.urlImage.trim()
+        };
+
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_URL}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify(dto),
+        });
+
+        const text = await res.text();
+        let data = {};
+        if (text) {
+          data = JSON.parse(text);
+        }
+
+        if (!res.ok || (data.ok === false)) {
+          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
+        }
+
+        alert('Libro editado correctamente');
+        navigate('/books');
+      } catch (err) {
+        alert(`Error al editar el libro: ${err.message}`);
+      }
     } else {
       setShake(true);
-      // Buscar el primer campo con error y hacer scroll
       const firstErrorField = [
-        'title', 'author', 'recordLabel', 'year', 'description', 'isrc', 'genres', 'price', 'stock', 'urlImage'
+        'title', 'author', 'editorial', 'description', 'isbn', 'genreBooks', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -117,6 +187,42 @@ const EditBookForm = () => {
       setTimeout(() => setShake(false), 600);
     }
   };
+
+  if (loading) return (
+    <Bg>
+      <Wrapper>
+        <div style={{color: "#333", textAlign: "center", padding: "20px"}}>
+          <h2>Cargando libro...</h2>
+          <p>Obteniendo datos del servidor...</p>
+        </div>
+      </Wrapper>
+    </Bg>
+  );
+
+  if (!form) return (
+    <Bg>
+      <Wrapper>
+        <div style={{color: "#333", textAlign: "center", padding: "20px"}}>
+          <h2>❌ Libro no encontrado</h2>
+          <p>No se pudo cargar el libro con ID: {id}</p>
+          <button 
+            onClick={() => navigate('/books')}
+            style={{
+              padding: '10px 20px',
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginTop: '20px'
+            }}
+          >
+            Volver a la lista
+          </button>
+        </div>
+      </Wrapper>
+    </Bg>
+  );
 
   return (
     <Bg>
@@ -151,35 +257,19 @@ const EditBookForm = () => {
             />
             {touched.author && errors.author && <ErrorMsg>{errors.author}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.recordLabel}>
+          <InputGroup ref={refs.editorial}>
             <Label>Editorial</Label>
             <Input
-              name="recordLabel"
-              value={form.recordLabel}
+              name="editorial"
+              value={form.editorial}
               onChange={handleChange}
               onBlur={handleBlur}
-              $active={touched.recordLabel && form.recordLabel}
-              $error={errors.recordLabel}
+              $active={touched.editorial && form.editorial}
+              $error={errors.editorial}
               required
               placeholder="Editorial"
             />
-            {touched.recordLabel && errors.recordLabel && <ErrorMsg>{errors.recordLabel}</ErrorMsg>}
-          </InputGroup>
-          <InputGroup ref={refs.year}>
-            <Label>Año</Label>
-            <Input
-              name="year"
-              type="number"
-              min="0"
-              value={form.year}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              $active={touched.year && form.year}
-              $error={errors.year}
-              required
-              placeholder="Año de publicación"
-            />
-            {touched.year && errors.year && <ErrorMsg>{errors.year}</ErrorMsg>}
+            {touched.editorial && errors.editorial && <ErrorMsg>{errors.editorial}</ErrorMsg>}
           </InputGroup>
           <InputGroup ref={refs.description}>
             <Label>Descripción</Label>
@@ -196,36 +286,36 @@ const EditBookForm = () => {
             />
             {touched.description && errors.description && <ErrorMsg>{errors.description}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.isrc}>
-            <Label>ISRC</Label>
+          <InputGroup ref={refs.isbn}>
+            <Label>ISBN</Label>
             <Input
-              name="isrc"
-              value={form.isrc}
+              name="isbn"
+              value={form.isbn}
               onChange={handleChange}
               onBlur={handleBlur}
-              $active={touched.isrc && form.isrc}
-              $error={errors.isrc}
+              $active={touched.isbn && form.isbn}
+              $error={errors.isbn}
               required
-              placeholder="Código ISRC"
+              placeholder="Código ISBN"
             />
-            {touched.isrc && errors.isrc && <ErrorMsg>{errors.isrc}</ErrorMsg>}
+            {touched.isbn && errors.isbn && <ErrorMsg>{errors.isbn}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.genres}>
+          <InputGroup ref={refs.genreBooks}>
             <Label>Géneros</Label>
-            <GenresBox $error={errors.genres}>
-              {genresList.map(g => (
+            <GenresBox $error={errors.genreBooks}>
+              {GENRE_BOOKS.map(g => (
                 <GenreCheckbox key={g}>
                   <input
                     type="checkbox"
                     value={g}
-                    checked={form.genres.includes(g)}
+                    checked={form.genreBooks.includes(g)}
                     onChange={handleGenreCheckbox}
                   />
                   <span>{g}</span>
                 </GenreCheckbox>
               ))}
             </GenresBox>
-            {touched.genres && errors.genres && <ErrorMsg>{errors.genres}</ErrorMsg>}
+            {touched.genreBooks && errors.genreBooks && <ErrorMsg>{errors.genreBooks}</ErrorMsg>}
             <Hint>Puedes seleccionar más de un género</Hint>
           </InputGroup>
           <InputGroup ref={refs.price}>
@@ -284,7 +374,7 @@ const EditBookForm = () => {
 
 export default EditBookForm;
 
-// --- Estilos (puedes copiar los mismos del book-form.jsx) ---
+// --- Estilos ---
 const shake = keyframes`
   0% { transform: translateX(0); }
   15% { transform: translateX(-8px); }

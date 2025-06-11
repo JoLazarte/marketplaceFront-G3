@@ -1,22 +1,53 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { books } from '../components/Book/Books'
-import { discs } from '../components/Disco/Discs'
 import { useCart } from '../context/CartContext'
 
+const API_URL_BOOKS = 'http://localhost:8080/books';
+const API_URL_DISCS = 'http://localhost:8080/musicAlbums';
+
 const DetailPage = () => {
-  const { type, id } = useParams()
-  const { addToCart } = useCart()
+  const { type, id } = useParams();
+  const { addToCart } = useCart();
+  const [item, setItem] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    const fetchItem = async () => {
+      try {
+        let url;
+        if (type === 'disc') {
+          url = `${API_URL_DISCS}/${id}`;
+        } else {
+          url = `${API_URL_BOOKS}/${id}`;
+        }
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.ok && data.data) {
+          setItem(data.data);
+        } else {
+          setItem(null);
+        }
+      } catch (err) {
+        setItem(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItem();
+  }, [type, id]);
 
-  const item = type === 'disc' 
-    ? discs.find(disc => disc.id === id)
-    : books.find(book => book.id === id)
+  if (loading) {
+    return (
+      <Container>
+        <Card>
+          <h1 style={{ color: "#fff" }}>Cargando...</h1>
+        </Card>
+      </Container>
+    );
+  }
 
   if (!item) {
     return (
@@ -29,7 +60,7 @@ const DetailPage = () => {
     );
   }
 
-  const isDisc = type === 'disc'
+  const isDisc = type === 'disc';
 
   const handleDecrease = () => {
     if (quantity > 1) {
@@ -51,16 +82,18 @@ const DetailPage = () => {
     addToCart(itemToAdd);
   };
 
+  // Para libros, el backend devuelve urlImage como string, para discos puede variar
+  const imageUrl = item.image || item.img_url || item.urlImage || (Array.isArray(item.urlImage) ? item.urlImage[0] : '');
+
   return (
     <Container>
       <Card>
         <ImageContainer>
-          <img src={item.image || item.img_url || item.urlImage?.[0]} alt={item.title} />
+          <img src={imageUrl} alt={item.title} />
         </ImageContainer>
         <InfoContainer>
           <Title>{item.title}</Title>
           <Author>{isDisc ? item.artist : item.author}</Author>
-          
           {isDisc ? (
             <RecordInfo>
               <DetailRow>
@@ -88,9 +121,9 @@ const DetailPage = () => {
               </DetailRow>
             </BookInfo>
           )}
-          
+
           <Description>{item.description}</Description>
-          
+
           <GenreContainer>
             {(isDisc ? item.genres : item.genreBooks || []).map((genre, index) => (
               <GenreTag key={index}>{genre}</GenreTag>
@@ -120,8 +153,8 @@ const DetailPage = () => {
         </InfoContainer>
       </Card>
     </Container>
-  )
-}
+  );
+};
 
 const Container = styled.div`
   min-height: 100vh;
@@ -319,4 +352,4 @@ const NoStockMessage = styled.p`
   margin: 1rem 0;
 `
 
-export default DetailPage 
+export default DetailPage
