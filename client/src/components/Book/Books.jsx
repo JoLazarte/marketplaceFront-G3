@@ -1,142 +1,75 @@
-import React, { useRef } from 'react'
-import Slider from 'react-slick'
-import styled from 'styled-components'
+import React, { useRef, useEffect, useState } from 'react';
+import Slider from 'react-slick';
+import styled from 'styled-components';
 import ProductCardBook from './ProductCardBook';
-import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
-export const books = [
-    {
-        id: "1",
-        title: "1984",
-        author: "George Orwell",
-        editorial: "Secker & Warburg",
-        description: "Una distopía política sobre un régimen totalitario.",
-        isbn: "978-0451524935",
-        genreBooks: ["Ficción", "Distopía", "Política"],
-        price: 18.99,
-        stock: 12,
-        urlImage: ["https://covers.openlibrary.org/b/id/8225631-L.jpg"]
-    },
-    {
-        id: "2",
-        title: "Cien años de soledad",
-        author: "Gabriel García Márquez",
-        editorial: "Editorial Sudamericana",
-        description: "La saga de la familia Buendía en el mítico pueblo de Macondo.",
-        isbn: "978-0307474728",
-        genreBooks: ["Realismo mágico", "Ficción literaria"],
-        price: 21.99,
-        stock: 8,
-        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1327881361i/320.jpg"]
-    },
-    {
-        id: "3",
-        title: "El Señor de los Anillos",
-        author: "J.R.R. Tolkien",
-        editorial: "Minotauro",
-        description: "La épica aventura de Frodo para destruir el Anillo Único.",
-        isbn: "978-0544003415",
-        genreBooks: ["Fantasía", "Aventura"],
-        price: 25.99,
-        stock: 15,
-        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1566425108i/33.jpg"]
-    },
-    {
-        id: "4",
-        title: "Don Quijote de la Mancha",
-        author: "Miguel de Cervantes",
-        editorial: "Real Academia Española",
-        description: "Las aventuras del ingenioso hidalgo Don Quijote.",
-        isbn: "978-8424938437",
-        genreBooks: ["Clásico", "Aventura", "Sátira"],
-        price: 23.99,
-        stock: 10,
-        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1546112331i/3836.jpg"]
-    },
-    {
-        id: "5",
-        title: "Rayuela",
-        author: "Julio Cortázar",
-        editorial: "Alfaguara",
-        description: "Una novela experimental que puede leerse en múltiples órdenes.",
-        isbn: "978-8420437484",
-        genreBooks: ["Ficción experimental", "Literatura latinoamericana"],
-        price: 19.99,
-        stock: 6,
-        urlImage: ["https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348517862i/94856.jpg"]
-    },
-   {
-  id: "6",
-  title: "Fahrenheit 451",
-  author: "Ray Bradbury",
-  editorial: "Ballantine Books",
-  description: "Una novela distópica sobre un futuro donde los libros están prohibidos.",
-  isbn: "978-1234567890",
-  genreBooks: ["Ciencia ficción", "Aventura"],
-  urlImage: ["https://tienda.planetadelibros.com.ar/cdn/shop/products/D_782412-MLA41732242606_052020-O.jpg?v=1684360495"],
-  price: 10.22,
-  stock: 0
-}
-]
-var settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    initialSlide: 0,
-    arrows : false,
-    responsive: [
-      {
-        breakpoint: 990,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          infinite: true,
-          dots: true
-        }
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          initialSlide: 2
-        }
-      },
-      {
-        breakpoint: 530,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]}
+const API_URL = 'http://localhost:8080/books';
+
+const settings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 5,
+  slidesToScroll: 1,
+  initialSlide: 0,
+  arrows: false,
+  responsive: [
+    { breakpoint: 990, settings: { slidesToShow: 3, slidesToScroll: 1, infinite: true, dots: true } },
+    { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 1, initialSlide: 2 } },
+    { breakpoint: 530, settings: { slidesToShow: 1, slidesToScroll: 1 } }
+  ]
+};
 
 const Books = () => {
-    const arrowRef = useRef(null);
-    const bookDisc = books.map((item, i) => (
-        <ProductCardBook item={item} key={i}/>
-    ));
+  const arrowRef = useRef(null);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    return (
-        <Container id='cardContainer'>
-            <Slider className="marginCard" ref={arrowRef} {...settings}>
-                {bookDisc}
-            </Slider> 
-            <Buttons>
-                <button 
-                    onClick={() => arrowRef.current.slickPrev()}
-                    className='back'><SlArrowLeft/></button>
-                <button 
-                    onClick={() => arrowRef.current.slickNext()}
-                    className='next'><SlArrowRight/></button>
-            </Buttons>
-        </Container>
-    )
-}
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        // Ajuste aquí:
+        if (data && Array.isArray(data.content)) {
+          setBooks(data.content);
+        } else {
+          setBooks([]);
+        }
+      } catch (err) {
+        setBooks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBooks();
+  }, []);
 
-export default Books
+  if (loading) {
+    return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>Cargando libros...</div>;
+  }
+
+  if (!books.length) {
+    return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>No hay libros disponibles.</div>;
+  }
+
+  return (
+    <Container id='cardContainer'>
+      <Slider className="marginCard" ref={arrowRef} {...settings}>
+        {books.filter(item => item && item.id).map(item => (
+          <ProductCardBook item={item} key={item.id} />
+        ))}
+      </Slider>
+      <Buttons>
+        <button onClick={() => arrowRef.current.slickPrev()} className='back'>{"<"}</button>
+        <button onClick={() => arrowRef.current.slickNext()} className='next'>{">"}</button>
+      </Buttons>
+    </Container>
+  );
+};
+
+export default Books;
+
 
 const Container = styled.div`
     width: 80%;

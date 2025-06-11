@@ -195,24 +195,22 @@ const EditAlbumForm = () => {
     if (Object.keys(validationErrors).length === 0) {
       try {
         // DTO que coincide con la estructura esperada por el backend
-        const dto = {
-          id: form.id,
-          title: form.title.trim(),
-          author: form.author.trim(),
-          recordLabel: form.recordLabel.trim(),
-          year: Number(form.year),
-          description: form.description.trim(),
-          isrc: form.isrc.trim(),
-          genres: form.genres, // Ya son strings que coinciden con el enum
-          price: Number(form.price),
-          stock: Number(form.stock),
-          urlImage: form.urlImage.trim() // El backend espera un string, no array
-        };
+  const dto = {
+  id: form.id,
+  title: form.title.trim(),
+  author: form.author.trim(),
+  recordLabel: form.recordLabel.trim(),
+  year: Number(form.year),
+  description: form.description.trim(),
+  isrc: form.isrc.trim(),
+  genres: form.genres, // array de strings
+  price: Number(form.price),
+  stock: Number(form.stock),
+  urlImage: form.urlImage.trim() // <-- string, no array
+};
 
+        console.log('Enviando DTO:', dto); // Para debugging
         const token = localStorage.getItem('token');
-        console.log('TOKEN QUE SE ENVÍA:', token);
-        console.log('DTO QUE SE ENVÍA:', dto);
-        console.log('URL DEL PUT:', API_URL);
 
         const res = await fetch(`${API_URL}`, {
           method: 'PUT',
@@ -223,17 +221,11 @@ const EditAlbumForm = () => {
           },
           body: JSON.stringify(dto),
         });
-
-        // Manejo seguro de respuesta vacía o sin JSON
-        const text = await res.text();
-        let data = {};
-        if (text) {
-          data = JSON.parse(text);
-        }
-
-        if (!res.ok || (data.ok === false)) {
-          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
-        }
+        const data = await res.json();
+        
+      if (!res.ok || data.ok === false) {
+  throw new Error(data.message || data.error || `Error ${res.status}: ${res.statusText}`);
+}
 
         alert('Álbum editado correctamente');
         navigate('/albums');

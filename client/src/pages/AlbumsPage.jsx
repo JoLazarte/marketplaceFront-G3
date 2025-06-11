@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { discs as albums } from '../components/Disco/Discs';
 import ProductCardDiscs from '../components/Disco/ProductCardDiscs';
 import { useNavigate } from 'react-router-dom';
 
-const getAllGenres = (albums) => {
+const API_URL = 'http://localhost:8080/musicAlbums';
+
+const getAllGenres = (discs) => {
   const genres = new Set();
-  albums.forEach(album => album.genres.forEach(g => genres.add(g)));
+  discs.forEach(album => (album.genres || []).forEach(g => genres.add(g)));
   return ['Todos', ...Array.from(genres)];
 };
 
@@ -15,19 +16,40 @@ const AlbumsPage = () => {
   const [search, setSearch] = useState('');
   const [bestseller, setBestseller] = useState(false);
   const [promo, setPromo] = useState(false);
+  const [discs, setDiscs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Simulación: más vendidos = primeros 3, promociones = precio < 25
+  useEffect(() => {
+    const fetchDiscs = async () => {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        // Ajuste para backend real:
+        if (data && Array.isArray(data.content)) {
+          setDiscs(data.content);
+        } else {
+          setDiscs([]);
+        }
+      } catch (err) {
+        setDiscs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDiscs();
+  }, []);
+
   const filteredAlbums = useMemo(() => {
-    let filtered = albums;
+    let filtered = discs;
 
     if (genre !== 'Todos') {
-      filtered = filtered.filter(album => album.genres.includes(genre));
+      filtered = filtered.filter(album => (album.genres || []).includes(genre));
     }
     if (search.trim() !== '') {
       filtered = filtered.filter(album =>
         album.title.toLowerCase().includes(search.toLowerCase()) ||
-        album.author.toLowerCase().includes(search.toLowerCase())
+        (album.artist && album.artist.toLowerCase().includes(search.toLowerCase()))
       );
     }
     if (bestseller) {
@@ -37,7 +59,20 @@ const AlbumsPage = () => {
       filtered = filtered.filter(album => album.price < 25);
     }
     return filtered;
-  }, [genre, search, bestseller, promo]);
+  }, [discs, genre, search, bestseller, promo]);
+
+  if (loading) {
+    return (
+      <Bg>
+        <Wrapper>
+          <Header>
+            <h1>Álbumes</h1>
+          </Header>
+          <div style={{color: "#fff"}}>Cargando álbumes...</div>
+        </Wrapper>
+      </Bg>
+    );
+  }
 
   return (
     <Bg>
@@ -70,7 +105,7 @@ const AlbumsPage = () => {
               Promociones
             </CheckboxLabel>
             <Select value={genre} onChange={e => setGenre(e.target.value)}>
-              {getAllGenres(albums).map(g => (
+              {getAllGenres(discs).map(g => (
                 <option key={g} value={g}>{g}</option>
               ))}
             </Select>
@@ -96,7 +131,6 @@ const AlbumsPage = () => {
 };
 
 export default AlbumsPage;
-
 // --- Estilos ---
 const Bg = styled.div`
   min-height: 80vh;

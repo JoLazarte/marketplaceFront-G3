@@ -1,24 +1,27 @@
 import React, { useState, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
-import { books } from '../components/Book/Books';
 import { useNavigate } from 'react-router-dom';
 
-// Obtener géneros únicos de los libros existentes
-const getAllGenres = (books) => {
-  const genres = new Set();
-  books.forEach(book => book.genreBooks.forEach(g => genres.add(g)));
-  return Array.from(genres);
-};
+// Enum de géneros según tu backend (ajusta si es necesario)
+const GENRE_BOOKS = [
+  "FANTASY", "FAIRY_TALE", "FICCION", "FABLE", "VERSE", "FOLKLORE", "HISTORICAL", "THRILLER", "HORROR",
+  "ADVENTURE", "ROMANCE", "DRAMA", "LGBTQ", "ADULT", "CHILDREN", "YOUNG", "CLASSIC", "EPIC", "METAFICTION",
+  "PHILOSOPHICAL", "POSTMODERN", "RELIGIOUS", "MAGICALREALISM", "SATIRE", "POLITICAL", "EROTIC", "WESTERN",
+  "URBAN", "COMEDY", "PARODY", "DARK_COMEDY", "DYSTOPIA", "SCI_FI", "SURREAL", "TALE", "TRAGICOMEDY", "CRIME",
+  "MANGA", "COMIC", "SUPERNATURAL", "PSYCHOLOGICAL", "ACADEMIC", "BIOGRAPHY", "BIBLIOGRAPHY", "COOKBOOK",
+  "JOURNALISTIC", "ART", "ANTINOVEL"
+];
+
+const API_URL = 'http://localhost:8080/books';
 
 const BookForm = () => {
   const [form, setForm] = useState({
     title: '',
     author: '',
-    recordLabel: '',
-    year: '',
+    editorial: '',
     description: '',
-    isrc: '',
-    genres: [],
+    isbn: '',
+    genreBooks: [],
     price: '',
     stock: '',
     urlImage: ''
@@ -27,17 +30,15 @@ const BookForm = () => {
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
   const navigate = useNavigate();
-  const genresList = getAllGenres(books);
 
   // Refs para scroll automático a errores
   const refs = {
     title: useRef(null),
     author: useRef(null),
-    recordLabel: useRef(null),
-    year: useRef(null),
+    editorial: useRef(null),
     description: useRef(null),
-    isrc: useRef(null),
-    genres: useRef(null),
+    isbn: useRef(null),
+    genreBooks: useRef(null),
     price: useRef(null),
     stock: useRef(null),
     urlImage: useRef(null)
@@ -48,11 +49,10 @@ const BookForm = () => {
     const newErrors = {};
     if (!fields.title.trim()) newErrors.title = 'El título es obligatorio';
     if (!fields.author.trim()) newErrors.author = 'El autor es obligatorio';
-    if (!fields.recordLabel.trim()) newErrors.recordLabel = 'La editorial es obligatoria';
-    if (!fields.year || isNaN(fields.year) || Number(fields.year) < 0) newErrors.year = 'Año inválido';
+    if (!fields.editorial.trim()) newErrors.editorial = 'La editorial es obligatoria';
     if (!fields.description.trim()) newErrors.description = 'La descripción es obligatoria';
-    if (!fields.isrc.trim()) newErrors.isrc = 'El ISRC es obligatorio';
-    if (!fields.genres.length) newErrors.genres = 'Selecciona al menos un género';
+    if (!fields.isbn.trim()) newErrors.isbn = 'El ISBN es obligatorio';
+    if (!fields.genreBooks.length) newErrors.genreBooks = 'Selecciona al menos un género';
     if (!fields.price || isNaN(fields.price) || Number(fields.price) <= 0) newErrors.price = 'Precio inválido';
     if (!fields.stock || isNaN(fields.stock) || Number(fields.stock) < 0) newErrors.stock = 'Stock inválido';
     if (!fields.urlImage.trim() || !/^https?:\/\/.+\..+/.test(fields.urlImage)) newErrors.urlImage = 'URL de imagen inválida';
@@ -71,13 +71,13 @@ const BookForm = () => {
     const { value, checked } = e.target;
     let newGenres;
     if (checked) {
-      newGenres = [...form.genres, value];
+      newGenres = [...form.genreBooks, value];
     } else {
-      newGenres = form.genres.filter(g => g !== value);
+      newGenres = form.genreBooks.filter(g => g !== value);
     }
-    setForm(prev => ({ ...prev, genres: newGenres }));
-    setTouched(prev => ({ ...prev, genres: true }));
-    setErrors(validate({ ...form, genres: newGenres }));
+    setForm(prev => ({ ...prev, genreBooks: newGenres }));
+    setTouched(prev => ({ ...prev, genreBooks: true }));
+    setErrors(validate({ ...form, genreBooks: newGenres }));
   };
 
   const handleBlur = e => {
@@ -85,24 +85,71 @@ const BookForm = () => {
     setErrors(validate(form));
   };
 
-  const handleSubmit = e => {
+  // POST: Enviar libro al backend
+  const handleSubmit = async e => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
     setTouched({
-      title: true, author: true, recordLabel: true, year: true, description: true,
-      isrc: true, genres: true, price: true, stock: true, urlImage: true
+      title: true, author: true, editorial: true, description: true,
+      isbn: true, genreBooks: true, price: true, stock: true, urlImage: true
     });
 
     if (Object.keys(validationErrors).length === 0) {
-      // Aquí iría la lógica para enviar el libro al backend
-      alert('Libro enviado (simulado)');
-      navigate('/books');
+      try {
+        // DTO para el backend
+        const dto = {
+          title: form.title.trim(),
+          author: form.author.trim(),
+          editorial: form.editorial.trim(),
+          description: form.description.trim(),
+          isbn: form.isbn.trim(),
+          genreBooks: form.genreBooks, // Array de strings exactos del enum
+          price: Number(form.price),
+          stock: Number(form.stock),
+          urlImage: form.urlImage.trim()
+        };
+
+        const token = localStorage.getItem('token');
+        console.log('TOKEN QUE SE ENVÍA:', token);
+        console.log('DTO QUE SE ENVÍA:', dto);
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify(dto),
+        });
+
+        // Manejo seguro de respuesta vacía o sin JSON
+        const text = await res.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (err) {
+            data = {};
+          }
+        }
+
+        if (!res.ok || (data.ok === false)) {
+          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
+        }
+
+        alert('Libro agregado correctamente');
+        navigate('/books');
+      } catch (err) {
+        console.error('Error al agregar el libro:', err);
+        alert(`Error al agregar el libro: ${err.message}`);
+      }
     } else {
       setShake(true);
       // Buscar el primer campo con error y hacer scroll
       const firstErrorField = [
-        'title', 'author', 'recordLabel', 'year', 'description', 'isrc', 'genres', 'price', 'stock', 'urlImage'
+        'title', 'author', 'editorial', 'description', 'isbn', 'genreBooks', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -145,35 +192,19 @@ const BookForm = () => {
             />
             {touched.author && errors.author && <ErrorMsg>{errors.author}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.recordLabel}>
+          <InputGroup ref={refs.editorial}>
             <Label>Editorial</Label>
             <Input
-              name="recordLabel"
-              value={form.recordLabel}
+              name="editorial"
+              value={form.editorial}
               onChange={handleChange}
               onBlur={handleBlur}
-              $active={touched.recordLabel && form.recordLabel}
-              $error={errors.recordLabel}
+              $active={touched.editorial && form.editorial}
+              $error={errors.editorial}
               required
               placeholder="Editorial"
             />
-            {touched.recordLabel && errors.recordLabel && <ErrorMsg>{errors.recordLabel}</ErrorMsg>}
-          </InputGroup>
-          <InputGroup ref={refs.year}>
-            <Label>Año</Label>
-            <Input
-              name="year"
-              type="number"
-              min="0"
-              value={form.year}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              $active={touched.year && form.year}
-              $error={errors.year}
-              required
-              placeholder="Año de publicación"
-            />
-            {touched.year && errors.year && <ErrorMsg>{errors.year}</ErrorMsg>}
+            {touched.editorial && errors.editorial && <ErrorMsg>{errors.editorial}</ErrorMsg>}
           </InputGroup>
           <InputGroup ref={refs.description}>
             <Label>Descripción</Label>
@@ -190,36 +221,36 @@ const BookForm = () => {
             />
             {touched.description && errors.description && <ErrorMsg>{errors.description}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.isrc}>
-            <Label>ISRC</Label>
+          <InputGroup ref={refs.isbn}>
+            <Label>ISBN</Label>
             <Input
-              name="isrc"
-              value={form.isrc}
+              name="isbn"
+              value={form.isbn}
               onChange={handleChange}
               onBlur={handleBlur}
-              $active={touched.isrc && form.isrc}
-              $error={errors.isrc}
+              $active={touched.isbn && form.isbn}
+              $error={errors.isbn}
               required
-              placeholder="Código ISRC"
+              placeholder="Código ISBN"
             />
-            {touched.isrc && errors.isrc && <ErrorMsg>{errors.isrc}</ErrorMsg>}
+            {touched.isbn && errors.isbn && <ErrorMsg>{errors.isbn}</ErrorMsg>}
           </InputGroup>
-          <InputGroup ref={refs.genres}>
+          <InputGroup ref={refs.genreBooks}>
             <Label>Géneros</Label>
-            <GenresBox $error={errors.genres}>
-              {genresList.map(g => (
+            <GenresBox $error={errors.genreBooks}>
+              {GENRE_BOOKS.map(g => (
                 <GenreCheckbox key={g}>
                   <input
                     type="checkbox"
                     value={g}
-                    checked={form.genres.includes(g)}
+                    checked={form.genreBooks.includes(g)}
                     onChange={handleGenreCheckbox}
                   />
                   <span>{g}</span>
                 </GenreCheckbox>
               ))}
             </GenresBox>
-            {touched.genres && errors.genres && <ErrorMsg>{errors.genres}</ErrorMsg>}
+            {touched.genreBooks && errors.genreBooks && <ErrorMsg>{errors.genreBooks}</ErrorMsg>}
             <Hint>Puedes seleccionar más de un género</Hint>
           </InputGroup>
           <InputGroup ref={refs.price}>

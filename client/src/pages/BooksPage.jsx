@@ -1,28 +1,49 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { books } from '../components/Book/Books';
 import ProductCardBook from '../components/Book/ProductCardBook';
-import { useNavigate } from 'react-router-dom'; // Agrega esto
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = 'http://localhost:8080/books';
 
 const getAllGenres = (books) => {
   const genres = new Set();
-  books.forEach(book => book.genreBooks.forEach(g => genres.add(g)));
+  books.forEach(book => (book.genreBooks || []).forEach(g => genres.add(g)));
   return ['Todos', ...Array.from(genres)];
 };
 
 const BooksPage = () => {
+  const [books, setBooks] = useState([]);
   const [genre, setGenre] = useState('Todos');
   const [search, setSearch] = useState('');
   const [bestseller, setBestseller] = useState(false);
   const [promo, setPromo] = useState(false);
-  const navigate = useNavigate(); // Hook para redirección
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // Simulación: más vendidos = primeros 3, promociones = precio < 20
+ useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      console.log('Respuesta backend:', data);
+      if (data && Array.isArray(data.content)) {
+        setBooks(data.content);
+      } else {
+        setBooks([]);
+      }
+    } catch (err) {
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchBooks();
+}, []);
+
   const filteredBooks = useMemo(() => {
     let filtered = books;
-
     if (genre !== 'Todos') {
-      filtered = filtered.filter(book => book.genreBooks.includes(genre));
+      filtered = filtered.filter(book => (book.genreBooks || []).includes(genre));
     }
     if (search.trim() !== '') {
       filtered = filtered.filter(book =>
@@ -37,7 +58,11 @@ const BooksPage = () => {
       filtered = filtered.filter(book => book.price < 20);
     }
     return filtered;
-  }, [genre, search, bestseller, promo]);
+  }, [books, genre, search, bestseller, promo]);
+
+  if (loading) {
+    return <Bg><Wrapper><Header><h1>Libros</h1></Header><div style={{color: "#fff"}}>Cargando libros...</div></Wrapper></Bg>;
+  }
 
   return (
     <Bg>
@@ -85,9 +110,11 @@ const BooksPage = () => {
           {filteredBooks.length === 0 ? (
             <Empty>No se encontraron libros.</Empty>
           ) : (
-            filteredBooks.map(book => (
-              <ProductCardBook key={book.id} item={book} />
-            ))
+            filteredBooks
+              .filter(book => book && book.id)
+              .map(book => (
+                <ProductCardBook key={book.id} item={book} />
+              ))
           )}
         </Grid>
       </Wrapper>

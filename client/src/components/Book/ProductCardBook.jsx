@@ -1,16 +1,18 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import './ProductCardBook.css'
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './ProductCardBook.css';
 import { FaRegEdit } from 'react-icons/fa';
 
-const ProductCardBook = ({item: {id, title, author, description, urlImage, price, stock}}) => {
+const ProductCardBook = ({ item }) => {
+  if (!item) return null;
+  const { id, title, author, description, urlImage, price, stock } = item;
   const isOutOfStock = stock === 0;
   const navigate = useNavigate();
 
   const CardContent = (
     <>
       <div className={`img-container${isOutOfStock ? ' out-of-stock' : ''}`}>
-        <img src={urlImage[0]} alt={title} />
+        <img src={urlImage} alt={title} />
         {isOutOfStock && <div className="stock-overlay">Sin stock</div>}
       </div>
       <div className="details">
@@ -47,7 +49,7 @@ const ProductCardBook = ({item: {id, title, author, description, urlImage, price
         </Link>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductCardBook
+export default ProductCardBook;

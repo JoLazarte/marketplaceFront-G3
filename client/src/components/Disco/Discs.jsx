@@ -1,146 +1,72 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import Slider from 'react-slick'
 import styled from 'styled-components'
 import ProductCardDiscs from './ProductCardDiscs';
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
-export const discs = [
-    {
-        id: "1",
-        title: "Abbey Road",
-        author: "The Beatles",
-        recordLabel: "Apple Records",
-        year: 1969,
-        description: "Uno de los álbumes más icónicos del rock.",
-        isrc: "GBAYE0601690",
-        genres: ["Rock", "Clásico"],
-        price: 24.99,
-        stock: 5,
-        urlImage: ["https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg"]
-    },
-    {
-        id: "2",
-        title: "Dark Side of the Moon",
-        author: "Pink Floyd",
-        recordLabel: "Harvest Records",
-        year: 1973,
-        description: "Un álbum revolucionario que definió el rock progresivo.",
-        isrc: "GBCTA7300014",
-        genres: ["Rock Progresivo", "Psicodélico"],
-        price: 29.99,
-        stock: 8,
-        urlImage: ["https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png"]
-    },
-    {
-        id: "3",
-        title: "Thriller",
-        author: "Michael Jackson",
-        recordLabel: "Epic Records",
-        year: 1982,
-        description: "El álbum más vendido de todos los tiempos.",
-        isrc: "USSM19902990",
-        genres: ["Pop", "R&B", "Funk"],
-        price: 27.99,
-        stock: 12,
-        urlImage: ["https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png"]
-    },
-    {
-        id: "4",
-        title: "Back in Black",
-        author: "AC/DC",
-        recordLabel: "Atlantic Records",
-        year: 1980,
-        description: "Un clásico del hard rock que marcó una época.",
-        isrc: "AUATA7900123",
-        genres: ["Hard Rock", "Rock"],
-        price: 23.99,
-        stock: 6,
-        urlImage: ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/ACDC_Back_in_Black.png/800px-ACDC_Back_in_Black.png"]
-    },
-    {
-        id: "5",
-        title: "Nevermind",
-        author: "Nirvana",
-        recordLabel: "DGC Records",
-        year: 1991,
-        description: "El álbum que definió el grunge y cambió el rock alternativo.",
-        isrc: "USDGC9100123",
-        genres: ["Grunge", "Rock Alternativo"],
-        price: 25.99,
-        stock: 10,
-        urlImage: ["https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg"]
-    },
-        {
-    id: "6",
-    title: "Party Favors",
-    author: "Sir Chloe",
-    recordLabel: "Terrible Records",
-    year: 2020,
-    description: "El EP debut de Sir Chloe, con un sonido indie rock alternativo y letras introspectivas.",
-    isrc: "USTRE2000001",
-    genres: ["Indie Rock", "Alternativo"],
-    price: 19.99,
-    stock: 0,
-    urlImage: ["https://i.scdn.co/image/ab67616d0000b273912b00ae82d10a2a4cdc084e"]
-}
-]
+const API_URL = 'http://localhost:8080/musicAlbums';
 
-var settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    initialSlide: 0,
-    arrows : false,
-    responsive: [
-      {
-        breakpoint: 990,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          infinite: true,
-          dots: true
-        }
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          initialSlide: 2
-        }
-      },
-      {
-        breakpoint: 530,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]}
+const settings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 5,
+  slidesToScroll: 1,
+  initialSlide: 0,
+  arrows : false,
+  responsive: [
+    { breakpoint: 990, settings: { slidesToShow: 3, slidesToScroll: 1, infinite: true, dots: true } },
+    { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 1, initialSlide: 2 } },
+    { breakpoint: 530, settings: { slidesToShow: 1, slidesToScroll: 1 } }
+  ]
+}
 
 const Discs = () => {
-    const arrowRef = useRef(null);
-    const discList = discs.map((item, i) => (
-        <ProductCardDiscs item={item} key={i}/>
-    ));
+  const arrowRef = useRef(null);
+  const [discs, setDiscs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    return (
-        <Container id='cardContainer'>
-            <Slider className="marginCard" ref={arrowRef} {...settings}>
-                {discList}
-            </Slider> 
-            <Buttons>
-                <button 
-                    onClick={() => arrowRef.current.slickPrev()}
-                    className='back'><SlArrowLeft/></button>
-                <button 
-                    onClick={() => arrowRef.current.slickNext()}
-                    className='next'><SlArrowRight/></button>
-            </Buttons>
-        </Container>
-    )
+  useEffect(() => {
+    const fetchDiscs = async () => {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        // Ajusta según la estructura real de tu backend:
+        if (data && Array.isArray(data.content)) {
+          setDiscs(data.content);
+        } else {
+          setDiscs([]);
+        }
+      } catch (err) {
+        setDiscs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDiscs();
+  }, []);
+
+  if (loading) {
+    return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>Cargando discos...</div>;
+  }
+
+  if (!discs.length) {
+    return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>No hay discos disponibles.</div>;
+  }
+
+  return (
+    <Container id='cardContainer'>
+      <Slider className="marginCard" ref={arrowRef} {...settings}>
+        {discs.filter(item => item && item.id).map(item => (
+          <ProductCardDiscs item={item} key={item.id} />
+        ))}
+      </Slider>
+      <Buttons>
+        <button onClick={() => arrowRef.current.slickPrev()} className='back'><SlArrowLeft/></button>
+        <button onClick={() => arrowRef.current.slickNext()} className='next'><SlArrowRight/></button>
+      </Buttons>
+    </Container>
+  )
 }
 
 export default Discs
