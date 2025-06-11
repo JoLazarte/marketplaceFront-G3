@@ -1,14 +1,22 @@
 import React, { useState, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
-import { discs as albums } from '../components/Disco/Discs';
 import { useNavigate } from 'react-router-dom';
 
-// Obtener géneros únicos de los álbumes existentes
-const getAllGenres = (albums) => {
-  const genres = new Set();
-  albums.forEach(album => album.genres.forEach(g => genres.add(g)));
-  return Array.from(genres);
-};
+// URL base del backend
+const API_URL = 'http://localhost:8080/musicAlbums';
+
+// Géneros disponibles (ajusta según tu backend)
+const AVAILABLE_GENRES = [
+  'CLASSICAL',
+  'ROCK',
+  'PROGRESSIVE',
+  'PSYCHODELIC',
+  'POP',
+  'FUNK',
+  'RB',
+  'HARDROCK',
+  'GRUNGE'
+];
 
 const AlbumForm = () => {
   const [form, setForm] = useState({
@@ -20,13 +28,13 @@ const AlbumForm = () => {
     genres: [],
     price: '',
     stock: '',
-    urlImage: ''
+    urlImage: '',
+    year: ''
   });
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
   const navigate = useNavigate();
-  const genresList = getAllGenres(albums);
 
   // Refs para scroll automático a errores
   const refs = {
@@ -38,7 +46,8 @@ const AlbumForm = () => {
     genres: useRef(null),
     price: useRef(null),
     stock: useRef(null),
-    urlImage: useRef(null)
+    urlImage: useRef(null),
+    year: useRef(null)
   };
 
   // Validación de campos
@@ -52,6 +61,9 @@ const AlbumForm = () => {
     if (!fields.genres.length) newErrors.genres = 'Selecciona al menos un género';
     if (!fields.price || isNaN(fields.price) || Number(fields.price) <= 0) newErrors.price = 'Precio inválido';
     if (!fields.stock || isNaN(fields.stock) || Number(fields.stock) < 0) newErrors.stock = 'Stock inválido';
+    if (!fields.year || isNaN(fields.year) || Number(fields.year) < 1900 || Number(fields.year) > new Date().getFullYear() + 1) {
+      newErrors.year = 'Año inválido';
+    }
     if (!fields.urlImage.trim() || !/^https?:\/\/.+\..+/.test(fields.urlImage)) newErrors.urlImage = 'URL de imagen inválida';
     return newErrors;
   };
@@ -82,30 +94,78 @@ const AlbumForm = () => {
     setErrors(validate(form));
   };
 
-  const handleSubmit = e => {
+  // POST: Enviar álbum al backend
+  const handleSubmit = async e => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
     setTouched({
       title: true, author: true, recordLabel: true, description: true,
-      isrc: true, genres: true, price: true, stock: true, urlImage: true
+      isrc: true, genres: true, price: true, stock: true, urlImage: true, year: true
     });
 
     if (Object.keys(validationErrors).length === 0) {
-      // Aquí iría la lógica para enviar el álbum al backend
-      alert('Álbum enviado (simulado)');
-      navigate('/albums');
+      try {
+        // DTO para el backend
+        const dto = {
+          title: form.title.trim(),
+          author: form.author.trim(),
+          recordLabel: form.recordLabel.trim(),
+          year: Number(form.year),
+          description: form.description.trim(),
+          isrc: form.isrc.trim(),
+          genres: form.genres,
+          price: Number(form.price),
+          stock: Number(form.stock),
+          urlImage: form.urlImage.trim()
+        };
+
+        const token = localStorage.getItem('token');
+        console.log('TOKEN QUE SE ENVÍA:', token);
+        console.log('DTO QUE SE ENVÍA:', dto);
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify(dto),
+        });
+
+        // Manejo seguro de respuesta vacía o sin JSON
+        const text = await res.text();
+        let data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (err) {
+            // Puede que el backend devuelva el álbum creado directamente
+            data = {};
+          }
+        }
+
+        if (!res.ok || (data.ok === false)) {
+          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
+        }
+
+        alert('Álbum agregado correctamente');
+        navigate('/albums');
+      } catch (err) {
+        console.error('Error al agregar el álbum:', err);
+        alert(`Error al agregar el álbum: ${err.message}`);
+      }
     } else {
       setShake(true);
       // Buscar el primer campo con error y hacer scroll
       const firstErrorField = [
-        'title', 'author', 'recordLabel', 'description', 'isrc', 'genres', 'price', 'stock', 'urlImage'
+        'title', 'author', 'recordLabel', 'year', 'description', 'isrc', 'genres', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         refs[firstErrorField].current.focus?.();
       }
-      // Quitar la animación después de que termine
       setTimeout(() => setShake(false), 600);
     }
   };
@@ -157,6 +217,23 @@ const AlbumForm = () => {
             />
             {touched.recordLabel && errors.recordLabel && <ErrorMsg>{errors.recordLabel}</ErrorMsg>}
           </InputGroup>
+          <InputGroup ref={refs.year}>
+            <Label>Año</Label>
+            <Input
+              name="year"
+              type="number"
+              min="1900"
+              max={new Date().getFullYear() + 1}
+              value={form.year}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              $active={touched.year && form.year}
+              $error={errors.year}
+              required
+              placeholder="Año de lanzamiento"
+            />
+            {touched.year && errors.year && <ErrorMsg>{errors.year}</ErrorMsg>}
+          </InputGroup>
           <InputGroup ref={refs.description}>
             <Label>Descripción</Label>
             <TextArea
@@ -189,7 +266,7 @@ const AlbumForm = () => {
           <InputGroup ref={refs.genres}>
             <Label>Géneros</Label>
             <GenresBox $error={errors.genres}>
-              {genresList.map(g => (
+              {AVAILABLE_GENRES.map(g => (
                 <GenreCheckbox key={g}>
                   <input
                     type="checkbox"
