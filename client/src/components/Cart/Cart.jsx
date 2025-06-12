@@ -21,7 +21,7 @@ const Cart = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Si el usuario no puede ver el carrito, no renderizamos nada
+
   if (!canViewCart()) return null;
 
   const getImageUrl = (item) => {
@@ -41,7 +41,6 @@ const Cart = ({ isOpen, onClose }) => {
 
   const updateBackendCart = async () => {
     try {
-      // Actualizar todos los items en el carrito
       for (const item of cartItems) {
         const response = await fetch('http://localhost:8080/carts/update', {
           method: 'PUT',
@@ -81,8 +80,8 @@ const Cart = ({ isOpen, onClose }) => {
 
     try {
       await updateBackendCart();
-      onClose(); // Cerramos el modal del carrito
-      navigate('/checkout'); // Redirigimos a la página de checkout
+      onClose(); 
+      navigate('/checkout'); 
     } catch (err) {
       setError('Error al procesar el carrito. Por favor, intenta nuevamente.');
       console.error('Error en checkout:', err);
