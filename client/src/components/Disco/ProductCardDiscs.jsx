@@ -6,30 +6,31 @@ import { useAuth } from '../../context/AuthContext';
 
 const ProductCardDiscs = ({ item }) => {
   if (!item) return null;
-  const imageUrl = item.image || item.img_url || item.urlImage || (Array.isArray(item.urlImage) ? item.urlImage[0] : '');
 
+  const { id, title, author, description, urlImage, price, stock = 0 } = item;
   const navigate = useNavigate();
-  const isOutOfStock = stock === 0;
   const { canEditProducts } = useAuth();
+  
+  const isOutOfStock = stock === 0;
 
   const CardContent = (
     <>
       <div className={`img-container${isOutOfStock ? ' out-of-stock' : ''}`}>
-        <img src={imageUrl} alt={item.title} />
+        <img src={Array.isArray(urlImage) ? urlImage[0] : urlImage} alt={title} />
         {isOutOfStock && <div className="stock-overlay">Sin stock</div>}
       </div>
       <div className={`details${isOutOfStock ? ' out-of-stock' : ''}`}>
-        <h3 className="title">{item.title}</h3>
-        <p className="author">{item.author}</p>
+        <h3 className="title">{title}</h3>
+        <p className="author">{author}</p>
         <p className="record-label">{item.recordLabel} {item.year && `- ${item.year}`}</p>
-        <p className="description">{item.description}</p>
-        <p className="price">${item.price}</p>
+        <p className="description">{description}</p>
+        <p className="price">${price}</p>
       </div>
     </>
   );
 
   return (
-    <div className="disco-card-container">
+    <div className={`disco-card-container${isOutOfStock ? ' disabled' : ''}`}>
       {canEditProducts() && (
         <div className="edit-btn-container">
           <button
@@ -50,12 +51,12 @@ const ProductCardDiscs = ({ item }) => {
       {isOutOfStock ? (
         <div>{CardContent}</div>
       ) : (
-        <Link to={`/detail/disc/${item.id}`} className="link-card">
+        <Link to={`/detail/disc/${id}`} className="link-card">
           {CardContent}
         </Link>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductCardDiscs
+export default ProductCardDiscs;
