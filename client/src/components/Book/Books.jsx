@@ -59,7 +59,8 @@ const Books = () => {
     fetchBooks();
   }, []);
 
-  if (loading) return <div>Cargando libros...</div>;
+  if (loading)  return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>Cargando libros...</div>;
+  if (!books.length) return <div style={{color: "#fff", textAlign: "center", padding: "2rem"}}>No hay libros disponibles.</div>;
   if (error) return <div>Error: {error}</div>;
 
   const bookDisc = books.map((item, i) => (

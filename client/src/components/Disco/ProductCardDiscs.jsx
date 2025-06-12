@@ -16,10 +16,10 @@ const ProductCardDiscs = ({ item }) => {
   const CardContent = (
     <>
       <div className={`img-container${isOutOfStock ? ' out-of-stock' : ''}`}>
-        <img src={Array.isArray(urlImage) ? urlImage[0] : urlImage} alt={title} />
+        <img src={urlImage} alt={title} />
         {isOutOfStock && <div className="stock-overlay">Sin stock</div>}
       </div>
-      <div className={`details${isOutOfStock ? ' out-of-stock' : ''}`}>
+      <div className={"details"}>
         <h3 className="title">{title}</h3>
         <p className="author">{author}</p>
         <p className="record-label">{item.recordLabel} {item.year && `- ${item.year}`}</p>

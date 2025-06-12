@@ -15,7 +15,7 @@ const ProductCardBook = ({ item }) => {
   const CardContent = (
     <>
       <div className={`img-container${isOutOfStock ? ' out-of-stock' : ''}`}>
-        <img src={urlImage[0]} alt={title} />
+        <img src={urlImage} alt={title} />
         {isOutOfStock && <div className="stock-overlay">Sin stock</div>}
       </div>
       <div className="details">
