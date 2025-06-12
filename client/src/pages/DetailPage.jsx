@@ -1,36 +1,99 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { books } from '../components/Book/Books'
-import { discs } from '../components/Disco/Discs'
+import { useCart } from '../context/CartContext'
+
+const API_URL_BOOKS = 'http://localhost:8080/books';
+const API_URL_DISCS = 'http://localhost:8080/musicAlbums';
 
 const DetailPage = () => {
-  const { type, id } = useParams()
-  
+  const { type, id } = useParams();
+  const { addToCart } = useCart();
+  const [item, setItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    const fetchItem = async () => {
+      try {
+        let url;
+        if (type === 'disc') {
+          url = `${API_URL_DISCS}/${id}`;
+        } else {
+          url = `${API_URL_BOOKS}/${id}`;
+        }
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.ok && data.data) {
+          setItem(data.data);
+        } else {
+          setItem(null);
+        }
+      } catch (err) {
+        setItem(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItem();
+  }, [type, id]);
 
-  const item = type === 'disc' 
-    ? discs.find(disc => disc.id === id)
-    : books.find(book => book.id === id)
-
-  if (!item) {
-    return <div>Producto no encontrado</div>
+  if (loading) {
+    return (
+      <Container>
+        <Card>
+          <h1 style={{ color: "#fff" }}>Cargando...</h1>
+        </Card>
+      </Container>
+    );
   }
 
-  const isDisc = type === 'disc'
+  if (!item) {
+    return (
+      <Container>
+        <Card>
+          <h1>Producto no encontrado</h1>
+          <p>Lo sentimos, el producto que buscas no está disponible.</p>
+        </Card>
+      </Container>
+    );
+  }
+
+  const isDisc = type === 'disc';
+
+  const handleDecrease = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (quantity < item.stock) {
+      setQuantity(prev => prev + 1);
+    }
+  };
+
+  const handleAddToCart = () => {
+    const itemToAdd = {
+      ...item,
+      quantity: quantity
+    };
+    addToCart(itemToAdd);
+  };
+
+  // Para libros, el backend devuelve urlImage como string, para discos puede variar
+  const imageUrl = item.image || item.img_url || item.urlImage || (Array.isArray(item.urlImage) ? item.urlImage[0] : '');
 
   return (
     <Container>
       <Card>
         <ImageContainer>
-          <img src={item.urlImage[0]} alt={item.title} />
+          <img src={imageUrl} alt={item.title} />
         </ImageContainer>
         <InfoContainer>
           <Title>{item.title}</Title>
-          <Author>{item.author}</Author>
-          
+          <Author>{isDisc ? item.artist : item.author}</Author>
           {isDisc ? (
             <RecordInfo>
               <DetailRow>
@@ -58,31 +121,40 @@ const DetailPage = () => {
               </DetailRow>
             </BookInfo>
           )}
-          
+
           <Description>{item.description}</Description>
-          
+
           <GenreContainer>
-            {(isDisc ? item.genres : item.genreBooks).map((genre, index) => (
+            {(isDisc ? item.genres : item.genreBooks || []).map((genre, index) => (
               <GenreTag key={index}>{genre}</GenreTag>
             ))}
           </GenreContainer>
 
-          <Details>
-            <DetailRow>
-              <DetailLabel>Stock:</DetailLabel>
-              <DetailValue>{item.stock} unidades</DetailValue>
-            </DetailRow>
-          </Details>
+          <Price>${item.price}</Price>
 
-          <PriceContainer>
-            <Price>${item.price}</Price>
-            <AddToCartButton>Agregar al carrito</AddToCartButton>
-          </PriceContainer>
+          {item.stock > 0 ? (
+            <StockContainer>
+              <StockStatus>✔ ¡En stock!</StockStatus>
+              <QuantityContainer>
+                <QuantityControl>
+                  <QuantityButton onClick={handleDecrease}>−</QuantityButton>
+                  <QuantityDisplay>{quantity}</QuantityDisplay>
+                  <QuantityButton onClick={handleIncrease}>+</QuantityButton>
+                </QuantityControl>
+                <AddToCartButton onClick={handleAddToCart}>
+                  Agregar al carrito
+                </AddToCartButton>
+              </QuantityContainer>
+              <StockInfo>Stock disponible: {item.stock}</StockInfo>
+            </StockContainer>
+          ) : (
+            <NoStockMessage>No hay stock disponible</NoStockMessage>
+          )}
         </InfoContainer>
       </Card>
     </Container>
-  )
-}
+  );
+};
 
 const Container = styled.div`
   min-height: 100vh;
@@ -91,6 +163,7 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-top: 7rem;
 `
 
 const Card = styled.div`
@@ -151,30 +224,40 @@ const Author = styled.h2`
   font-weight: 500;
 `
 
-const RecordInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+const Description = styled.p`
+  font-size: 1rem;
+  color: #d4d4d4;
+  line-height: 1.6;
+`
+
+const Price = styled.div`
+  font-size: 2rem;
+  font-weight: bold;
+  color: #00ff00;
   margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+`
+
+const DetailRow = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0;
+`
+
+const DetailLabel = styled.span`
+  color: #808080;
+  font-weight: 500;
+`
+
+const DetailValue = styled.span`
+  color: #ffffff;
+`
+
+const RecordInfo = styled.div`
+  margin: 1rem 0;
 `
 
 const BookInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-`
-
-const Description = styled.p`
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #d4d4d4;
   margin: 1rem 0;
 `
 
@@ -186,72 +269,87 @@ const GenreContainer = styled.div`
 `
 
 const GenreTag = styled.span`
-  background: linear-gradient(135deg, #333333 0%, #404040 100%);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
   padding: 0.5rem 1rem;
-  border-radius: 25px;
+  border-radius: 20px;
+  color: #d4d4d4;
   font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid #505050;
 `
 
-const Details = styled.div`
-  margin: 1rem 0;
+const StockContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  margin-top: 1rem;
 `
 
-const DetailRow = styled.div`
+const StockStatus = styled.p`
+  color: #00ff00;
+  font-weight: 500;
+  margin: 0;
+`
+
+const QuantityContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
 `
 
-const DetailLabel = styled.span`
-  font-weight: 600;
-  color: #ffffff;
-  min-width: 100px;
-`
-
-const DetailValue = styled.span`
-  color: #a8a8a8;
-`
-
-const PriceContainer = styled.div`
+const QuantityControl = styled.div`
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-top: auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
 `
 
-const Price = styled.span`
-  font-size: 2rem;
-  font-weight: 700;
-  color: #00ff00;
-  text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+const QuantityButton = styled.button`
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: #00ff00;
+  }
+`
+
+const QuantityDisplay = styled.span`
+  color: #ffffff;
+  padding: 0 1rem;
+  min-width: 3rem;
+  text-align: center;
 `
 
 const AddToCartButton = styled.button`
-  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+  background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
   color: #ffffff;
-  border: 1px solid #404040;
-  padding: 1rem 2rem;
-  border-radius: 30px;
-  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    border-color: #00ff00;
-  }
-
-  &:active {
-    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
   }
 `
 
-export default DetailPage 
+const StockInfo = styled.p`
+  color: #808080;
+  font-size: 0.9rem;
+  margin: 0;
+`
+
+const NoStockMessage = styled.p`
+  color: #ff4444;
+  font-weight: 600;
+  margin: 1rem 0;
+`
+
+export default DetailPage
