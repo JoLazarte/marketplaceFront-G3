@@ -1,0 +1,53 @@
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #121212;
+  padding-top: 5rem; /* Espacio para el header fijo */
+}
+
+section {
+  background: linear-gradient(135deg, #232526 0%, #1c1c1c 100%);
+}
+
+#portada {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 80px 0px 80px 0px; 
+}
+
+#subPortada {
+  position: relative;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  background-image: url(/dumbo2.png);
+  background-size: cover;
+  background-position: center;
+  height: 500px;
+  margin-bottom: 60px;
+}
+
+.carrusel {
+  width: 100%;
+  height: 100%; 
+  padding: 50px 20px 180px;
+  margin-bottom: 60px;
+}
+
+.grid {
+  width: 100%;
+  height: 100%; 
+  padding: 50px 20px;
+  margin-bottom: 60px;
+}
+
+.h3layout {
+  color: rgb(251, 251, 251);
+  padding-top: 20px;
+  padding-bottom: 75px;
+  text-align: center;
+} 
