@@ -7,24 +7,70 @@ import { useAuth } from '../context/AuthContext';
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const API_URL = 'http://localhost:8080';
+
+  const handleCancel = () => {
+    navigate(-1); // Vuelve a la página anterior
+  };
+
+  const processPurchase = async (cartId) => {
+    try {
+      const response = await fetch(`${API_URL}/buys/process/${cartId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Error al procesar la compra');
+      }
+
+      console.log('Compra exitosa:', data.data);
+      return data.data;
+    } catch (error) {
+      console.error('Error en la compra:', error);
+      throw error;
+    }
+  };
 
   const handleConfirmPurchase = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log("se realizo la compra")
+      // Obtenemos el cartId del localStorage
+      const cartId = localStorage.getItem('currentCartId');
+      
+      if (!cartId) {
+        throw new Error('No se encontró el ID del carrito. Por favor, vuelve al carrito e intenta nuevamente.');
+      }
+
+      // Procesamos la compra
+      const purchaseData = await processPurchase(cartId);
+      console.log('Compra procesada:', purchaseData);
+
+      // Limpiamos el carrito local y el cartId del localStorage después de una compra exitosa
+      clearCart();
+      localStorage.removeItem('currentCartId');
+      
+      // Redirigimos a una página de éxito o al inicio
+      navigate('/');
+      
     } catch (err) {
-      setError('Error al procesar la compra. Por favor, intenta nuevamente.');
+      console.error('Error en la compra:', err);
+      setError(err.message || 'Error al procesar la compra. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
     }
   };
-
-
 
   return (
     <Container>

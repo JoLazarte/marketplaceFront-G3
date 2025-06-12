@@ -41,17 +41,22 @@ const Cart = ({ isOpen, onClose }) => {
 
   const updateBackendCart = async () => {
     try {
+      let cartId = null;
       for (const item of cartItems) {
-        const response = await fetch('http://localhost:8080/carts/update', {
+        // Determinamos si es un álbum o un libro basándonos en las propiedades del item
+        const isAlbum = 'recordLabel' in item || 'isrc' in item;
+        const endpoint = isAlbum ? 'http://localhost:8080/carts/update/musicAlbum' : 'http://localhost:8080/carts/update';
+        const body = isAlbum 
+          ? { musicAlbumId: item.id, quantity: item.quantity }
+          : { bookId: item.id, quantity: item.quantity };
+
+        const response = await fetch(endpoint, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            bookId: item.id,
-            quantity: item.quantity
-          })
+          body: JSON.stringify(body)
         });
 
         if (!response.ok) {
@@ -61,8 +66,18 @@ const Cart = ({ isOpen, onClose }) => {
 
         const data = await response.json();
         console.log(`Carrito actualizado para ${item.title}:`, data);
+        
+        // Guardamos el cartId de la respuesta
+        if (data.ok && data.data && data.data.cartId) {
+          cartId = data.data.cartId;
+        }
       }
-      return true;
+
+      if (!cartId) {
+        throw new Error('No se pudo obtener el ID del carrito');
+      }
+
+      return { cartId }; // Retornamos un objeto con el cartId
     } catch (error) {
       console.error('Error al actualizar el carrito:', error);
       throw error;
@@ -79,7 +94,9 @@ const Cart = ({ isOpen, onClose }) => {
     setError(null);
 
     try {
-      await updateBackendCart();
+      const { cartId } = await updateBackendCart();
+      // Guardamos el cartId en localStorage para usarlo en el checkout
+      localStorage.setItem('currentCartId', cartId);
       onClose(); 
       navigate('/checkout'); 
     } catch (err) {
