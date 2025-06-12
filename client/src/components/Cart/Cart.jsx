@@ -5,18 +5,21 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Cart = ({ isOpen, onClose }) => {
-  const { canViewCart, role } = useAuth();
+  const { canViewCart, role, token } = useAuth();
   const navigate = useNavigate();
   const { 
     cartItems, 
     removeFromCart, 
     updateQuantity, 
     getCartTotal,
-    getItemCount 
+    getItemCount,
+    clearCart 
   } = useCart();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [stockMessage, setStockMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Si el usuario no puede ver el carrito, no renderizamos nada
   if (!canViewCart()) return null;
@@ -36,28 +39,71 @@ const Cart = ({ isOpen, onClose }) => {
     updateQuantity(item.id, newQuantity);
   };
 
-  const handleCheckout = () => {
+  const updateBackendCart = async () => {
+    try {
+      // Actualizar todos los items en el carrito
+      for (const item of cartItems) {
+        const response = await fetch('http://localhost:8080/carts/update', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            bookId: item.id,
+            quantity: item.quantity
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al actualizar el carrito');
+        }
+
+        const data = await response.json();
+        console.log(`Carrito actualizado para ${item.title}:`, data);
+      }
+      return true;
+    } catch (error) {
+      console.error('Error al actualizar el carrito:', error);
+      throw error;
+    }
+  };
+
+  const handleCheckout = async () => {
     if (role === 'BUYER_NO_REGISTRADO') {
       setShowLoginModal(true);
-    } else {
-      // Aquí iría la lógica para proceder al pago
-      console.log('Procediendo al pago...');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await updateBackendCart();
+      onClose(); // Cerramos el modal del carrito
+      navigate('/checkout'); // Redirigimos a la página de checkout
+    } catch (err) {
+      setError('Error al procesar el carrito. Por favor, intenta nuevamente.');
+      console.error('Error en checkout:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLoginClick = () => {
-    setShowLoginModal(false); // Cerramos el modal de login
-    onClose(); // Cerramos el carrito
+    setShowLoginModal(false);
+    onClose();
     setTimeout(() => {
-      navigate('/login'); // Navegamos a la página de login después de un pequeño delay
+      navigate('/login');
     }, 100);
   };
 
   const handleRegisterClick = () => {
-    setShowLoginModal(false); // Cerramos el modal de login
-    onClose(); // Cerramos el carrito
+    setShowLoginModal(false);
+    onClose();
     setTimeout(() => {
-      navigate('/register'); // Navegamos a la página de registro después de un pequeño delay
+      navigate('/register');
     }, 100);
   };
 
@@ -70,6 +116,10 @@ const Cart = ({ isOpen, onClose }) => {
         </CartHeader>
 
         <CartContent>
+          {error && (
+            <ErrorMessage>{error}</ErrorMessage>
+          )}
+          
           {stockMessage && (
             <StockWarning>{stockMessage}</StockWarning>
           )}
@@ -98,13 +148,14 @@ const Cart = ({ isOpen, onClose }) => {
                       <QuantityControls>
                         <QuantityButton 
                           onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                          disabled={loading}
                         >
                           -
                         </QuantityButton>
                         <QuantityDisplay>{item.quantity}</QuantityDisplay>
                         <QuantityButton 
                           onClick={() => handleQuantityChange(item, item.quantity + 1)}
-                          disabled={item.quantity >= item.stock}
+                          disabled={loading || item.quantity >= item.stock}
                         >
                           +
                         </QuantityButton>
@@ -119,8 +170,11 @@ const Cart = ({ isOpen, onClose }) => {
                 <Total>
                   Total: ${getCartTotal().toFixed(2)}
                 </Total>
-                <CheckoutButton onClick={handleCheckout}>
-                  Proceder al pago
+                <CheckoutButton 
+                  onClick={handleCheckout}
+                  disabled={loading}
+                >
+                  {loading ? 'Procesando...' : 'Proceder al pago'}
                 </CheckoutButton>
               </CartFooter>
             </>
@@ -412,6 +466,16 @@ const CancelButton = styled(ActionButton)`
   &:hover {
     background: #505050;
   }
+`;
+
+const ErrorMessage = styled.div`
+  background-color: #ff4444;
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
 `;
 
 export default Cart; 

@@ -46,11 +46,6 @@ const AuthProvider = ({ children }) => {
         };
         setUser(updatedUser);
         return { success: true };
-      } else {
-        return { 
-          success: false, 
-          error: data.error || 'Error al actualizar el perfil' 
-        };
       }
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
@@ -109,12 +104,12 @@ const AuthProvider = ({ children }) => {
     setRole('BUYER_NO_REGISTRADO');
   };
 
-  // Funciones de verificación de roles
+
   const isAdmin = () => role === 'ADMIN';
   const isBuyer = () => role === 'BUYER';
   const isBuyerNoRegistrado = () => role === 'BUYER_NO_REGISTRADO';
 
-  // Funciones de verificación de permisos
+
   const canViewCart = () => role === 'BUYER' || role === 'BUYER_NO_REGISTRADO';
   const canEditProducts = () => role === 'ADMIN';
   const canMakePurchase = () => role === 'BUYER' || role === 'BUYER_NO_REGISTRADO';
