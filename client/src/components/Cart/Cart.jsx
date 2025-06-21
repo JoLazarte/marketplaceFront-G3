@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useBuys } from '../../hooks/useBuys';
 
 const Cart = ({ isOpen, onClose }) => {
   const { canViewCart, role, token } = useAuth();
@@ -15,6 +16,7 @@ const Cart = ({ isOpen, onClose }) => {
     getItemCount,
     clearCart 
   } = useCart();
+  const { createBuy, loading: buyLoading, error: buyError } = useBuys();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [stockMessage, setStockMessage] = useState('');
@@ -39,36 +41,6 @@ const Cart = ({ isOpen, onClose }) => {
     updateQuantity(item.id, newQuantity);
   };
 
-  const updateBackendCart = async () => {
-    try {
-      for (const item of cartItems) {
-        const response = await fetch('http://localhost:8080/carts/update', {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            bookId: item.id,
-            quantity: item.quantity
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Error al actualizar el carrito');
-        }
-
-        const data = await response.json();
-        console.log(`Carrito actualizado para ${item.title}:`, data);
-      }
-      return true;
-    } catch (error) {
-      console.error('Error al actualizar el carrito:', error);
-      throw error;
-    }
-  };
-
   const handleCheckout = async () => {
     if (role === 'BUYER_NO_REGISTRADO') {
       setShowLoginModal(true);
@@ -79,11 +51,17 @@ const Cart = ({ isOpen, onClose }) => {
     setError(null);
 
     try {
-      await updateBackendCart();
+      // Crear la compra directamente
+      const buyData = await createBuy(cartItems, token);
+      console.log('Compra creada:', buyData);
+      
+      // Guardamos el ID de la compra en localStorage para usarlo en checkout
+      localStorage.setItem('currentBuyId', buyData.id);
+      
       onClose(); 
       navigate('/checkout'); 
     } catch (err) {
-      setError('Error al procesar el carrito. Por favor, intenta nuevamente.');
+      setError(err.message || 'Error al procesar el carrito. Por favor, intenta nuevamente.');
       console.error('Error en checkout:', err);
     } finally {
       setLoading(false);
@@ -171,9 +149,9 @@ const Cart = ({ isOpen, onClose }) => {
                 </Total>
                 <CheckoutButton 
                   onClick={handleCheckout}
-                  disabled={loading}
+                  disabled={loading || buyLoading}
                 >
-                  {loading ? 'Procesando...' : 'Proceder al pago'}
+                  {loading || buyLoading ? 'Procesando...' : 'Proceder al pago'}
                 </CheckoutButton>
               </CartFooter>
             </>
@@ -477,4 +455,4 @@ const ErrorMessage = styled.div`
   font-size: 0.9rem;
 `;
 
-export default Cart; 
+export default Cart;
