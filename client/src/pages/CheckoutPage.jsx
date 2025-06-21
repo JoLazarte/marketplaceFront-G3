@@ -3,80 +3,180 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useBuys } from '../hooks/useBuys';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { user, token } = useAuth();
+  const { confirmBuy, emptyBuy, loading, error } = useBuys();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const handleConfirmPurchase = async () => {
-    setLoading(true);
-    setError(null);
+  const handleCancel = async () => {
+    // Obtener el ID de la compra
+    const buyId = localStorage.getItem('currentBuyId');
     
+    if (!buyId) {
+      // Si no hay buyId, simplemente volver atrás
+      navigate(-1);
+      return;
+    }
+
+    // Mostrar modal de confirmación
+    setShowCancelModal(true);
+  };
+
+  const handleConfirmCancel = async () => {
     try {
-      console.log("se realizo la compra")
+      const buyId = localStorage.getItem('currentBuyId');
+      
+      // Vaciar la compra en el backend
+      await emptyBuy(buyId, token);
+      
+      // Limpiar localStorage y carrito
+      localStorage.removeItem('currentBuyId');
+      clearCart();
+      
+      // Cerrar modal y volver al home
+      setShowCancelModal(false);
+      navigate('/');
     } catch (err) {
-      setError('Error al procesar la compra. Por favor, intenta nuevamente.');
-    } finally {
-      setLoading(false);
+      console.error('Error al cancelar la compra:', err);
+      alert('Error al cancelar la compra. Por favor, intenta nuevamente.');
     }
   };
 
+  const handleCancelModalClose = () => {
+    setShowCancelModal(false);
+  };
 
+  const handleConfirmPurchase = async () => {
+    try {
+      // Obtener el ID de la compra que se guardó en localStorage
+      const buyId = localStorage.getItem('currentBuyId');
+      
+      if (!buyId) {
+        throw new Error('No se encontró el ID de la compra. Por favor, vuelve al carrito e intenta nuevamente.');
+      }
+
+      const confirmedBuy = await confirmBuy(buyId, token);
+      console.log('Compra confirmada:', confirmedBuy);
+
+      clearCart();
+      
+      localStorage.removeItem('currentBuyId');
+      
+     
+      setShowSuccessModal(true);
+      
+    } catch (err) {
+      console.error('Error en la compra:', err);
+
+    }
+  };
+
+  const handleGoHome = () => {
+    setShowSuccessModal(false);
+    navigate('/');
+  };
 
   return (
-    <Container>
-      <CheckoutCard>
-        <Title>Confirmar Compra</Title>
-        
-        <UserInfo>
-          <h3>Información del Cliente</h3>
-          <p>Nombre: {user.firstName} {user.lastName}</p>
-          <p>Email: {user.email}</p>
-        </UserInfo>
+    <>
+      <Container>
+        <CheckoutCard>
+          <Title>Confirmar Compra</Title>
+          
+          <UserInfo>
+            <h3>Información del Cliente</h3>
+            <p>Nombre: {user.firstName} {user.lastName}</p>
+            <p>Email: {user.email}</p>
+          </UserInfo>
 
-        <OrderSummary>
-          <h3>Resumen del Pedido</h3>
-          {cartItems.map(item => (
-            <ItemRow key={item.id}>
-              <ItemImage src={Array.isArray(item.urlImage) ? item.urlImage[0] : item.urlImage} alt={item.title} />
-              <ItemInfo>
-                <ItemTitle>{item.title}</ItemTitle>
-                <ItemDetails>
-                  <span>Cantidad: {item.quantity}</span>
-                  <span>Precio unitario: ${item.price}</span>
-                  <span>Subtotal: ${(item.price * item.quantity).toFixed(2)}</span>
-                </ItemDetails>
-              </ItemInfo>
-            </ItemRow>
-          ))}
-        </OrderSummary>
+          <OrderSummary>
+            <h3>Resumen del Pedido</h3>
+            {cartItems.map(item => (
+              <ItemRow key={item.id}>
+                <ItemImage src={Array.isArray(item.urlImage) ? item.urlImage[0] : item.urlImage} alt={item.title} />
+                <ItemInfo>
+                  <ItemTitle>{item.title}</ItemTitle>
+                  <ItemDetails>
+                    <span>Cantidad: {item.quantity}</span>
+                    <span>Precio unitario: ${item.price}</span>
+                    <span>Subtotal: ${(item.price * item.quantity).toFixed(2)}</span>
+                  </ItemDetails>
+                </ItemInfo>
+              </ItemRow>
+            ))}
+          </OrderSummary>
 
-        <TotalSection>
-          <TotalLabel>Total a Pagar:</TotalLabel>
-          <TotalAmount>${getCartTotal().toFixed(2)}</TotalAmount>
-        </TotalSection>
+          <TotalSection>
+            <TotalLabel>Total a Pagar:</TotalLabel>
+            <TotalAmount>${getCartTotal().toFixed(2)}</TotalAmount>
+          </TotalSection>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+          {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <ButtonGroup>
-          <ConfirmButton 
-            onClick={handleConfirmPurchase}
-            disabled={loading}
-          >
-            {loading ? 'Procesando...' : 'Confirmar Compra'}
-          </ConfirmButton>
-          <CancelButton 
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            Cancelar
-          </CancelButton>
-        </ButtonGroup>
-      </CheckoutCard>
-    </Container>
+          <ButtonGroup>
+            <ConfirmButton 
+              onClick={handleConfirmPurchase}
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : 'Confirmar Compra'}
+            </ConfirmButton>
+            <CancelButton 
+              onClick={handleCancel}
+              disabled={loading}
+            >
+              Cancelar
+            </CancelButton>
+          </ButtonGroup>
+        </CheckoutCard>
+      </Container>
+
+      {/* Modal de éxito */}
+      {showSuccessModal && (
+        <>
+          <SuccessModal>
+            <SuccessContent>
+              <SuccessIcon>✓</SuccessIcon>
+              <SuccessTitle>¡Compra Confirmada!</SuccessTitle>
+              <SuccessMessage>
+                Tu compra ha sido procesada exitosamente. 
+                Recibirás un email de confirmación con los detalles de tu pedido.
+              </SuccessMessage>
+              <HomeButton onClick={handleGoHome}>
+                Volver al Inicio
+              </HomeButton>
+            </SuccessContent>
+          </SuccessModal>
+          <ModalOverlay onClick={handleGoHome} />
+        </>
+      )}
+
+      {/* Modal de confirmación de cancelación */}
+      {showCancelModal && (
+        <CancelModal>
+          <CancelContent>
+            <CancelTitle>¿Estás seguro de que quieres cancelar esta compra?</CancelTitle>
+            <CancelButtons>
+              <CancelModalButton 
+                onClick={handleConfirmCancel}
+                disabled={loading}
+              >
+                Confirmar
+              </CancelModalButton>
+              <CancelButton 
+                onClick={handleCancelModalClose}
+                disabled={loading}
+              >
+                Cancelar
+              </CancelButton>
+            </CancelButtons>
+          </CancelContent>
+        </CancelModal>
+      )}
+    </>
   );
 };
 
@@ -230,28 +330,6 @@ const CancelButton = styled(Button)`
   }
 `;
 
-const EmptyMessage = styled.div`
-  text-align: center;
-  color: #ffffff;
-  padding: 2rem;
-  background: #242424;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const BackButton = styled(Button)`
-  background: #00ff00;
-  color: #000000;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  
-  &:hover {
-    background: #00cc00;
-  }
-`;
-
 const ErrorMessage = styled.div`
   background-color: #ff4444;
   color: white;
@@ -259,6 +337,139 @@ const ErrorMessage = styled.div`
   border-radius: 8px;
   text-align: center;
   margin: 1rem 0;
+`;
+
+const SuccessModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+`;
+
+const SuccessContent = styled.div`
+  background-color: #242424;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+`;
+
+const SuccessIcon = styled.span`
+  font-size: 4rem;
+  color: #00ff00;
+  margin-bottom: 1rem;
+`;
+
+const SuccessTitle = styled.h2`
+  color: #ffffff;
+  margin-bottom: 1rem;
+`;
+
+const SuccessMessage = styled.p`
+  color: #ffffff;
+  margin-bottom: 2rem;
+`;
+
+const HomeButton = styled.button`
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #00ff00;
+  color: #000000;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background-color: #00cc00;
+    transform: translateY(-2px);
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+`;
+
+const CancelModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+`;
+
+const CancelContent = styled.div`
+  background-color: #242424;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+`;
+
+const CancelTitle = styled.h2`
+  color: #ffffff;
+  margin-bottom: 1rem;
+`;
+
+const CancelButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+`;
+
+const CancelModalButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  &:first-child {
+    background: #ff4444;
+    color: #ffffff;
+    
+    &:hover:not(:disabled) {
+      background: #cc3333;
+      transform: translateY(-2px);
+    }
+  }
+  
+  &:last-child {
+    background: #333;
+    color: #ffffff;
+    border: 1px solid #404040;
+    
+    &:hover:not(:disabled) {
+      background: #404040;
+    }
+  }
 `;
 
 export default CheckoutPage; 
