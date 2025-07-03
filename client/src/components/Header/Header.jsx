@@ -142,7 +142,7 @@ const Header = () => {
 };
 
 const HeaderContainer = styled.header`
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
   border-bottom: 1px solid rgba(0, 255, 0, 0.2);
   padding: 1rem 2rem;
   position: sticky;
@@ -154,7 +154,20 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  
+  /* Overlay oscuro que cubre toda la altura */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+  }
 `;
 
 const Logo = styled.div`

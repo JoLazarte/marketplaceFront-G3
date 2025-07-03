@@ -1,6 +1,6 @@
-// Utility functions for better error handling and API communication
+// Funciones utilitarias para manejo de errores y comunicación con la API
 export const apiUtils = {
-  // Enhanced fetch with better error handling
+  // Función fetch mejorada con manejo robusto de errores
   async fetchWithErrorHandling(url, options = {}) {
     console.log(`=== API CALL ===`);
     console.log(`URL: ${url}`);
@@ -18,14 +18,14 @@ export const apiUtils = {
       console.log(`Status Text: ${response.statusText}`);
       console.log(`OK: ${response.ok}`);
       
-      // Clone the response to read it multiple times
+      // Clonamos la respuesta para poder leerla múltiples veces
       const responseClone = response.clone();
       
-      // Try to read as text first
+      // Primero intentamos leer como texto
       const responseText = await responseClone.text();
       console.log(`Response Text: ${responseText}`);
       
-      // If there's no content, handle appropriately
+      // Si no hay contenido, manejamos según el caso
       if (!responseText) {
         if (response.ok) {
           return { ok: true, data: null, status: response.status };
@@ -34,14 +34,14 @@ export const apiUtils = {
         }
       }
       
-      // Try to parse as JSON
+      // Intentamos parsear como JSON
       let data;
       try {
         data = JSON.parse(responseText);
         console.log(`Parsed Data:`, data);
       } catch (parseError) {
         console.warn(`Failed to parse JSON:`, parseError);
-        // If it's not JSON but the response is OK, return the text
+        // Si no es JSON pero la respuesta es exitosa, devolvemos el texto
         if (response.ok) {
           return { ok: true, data: responseText, status: response.status };
         } else {
@@ -49,7 +49,7 @@ export const apiUtils = {
         }
       }
       
-      // Check if the response indicates success
+      // Verificamos si la respuesta indica éxito
       if (!response.ok) {
         const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`;
         throw new Error(errorMessage);
@@ -64,7 +64,7 @@ export const apiUtils = {
     }
   },
 
-  // Get all books (with filtering)
+  // Obtener todos los libros con filtros opcionales
   async getBooks(options = {}) {
     const { 
       isAdmin = false, 
@@ -91,7 +91,7 @@ export const apiUtils = {
       }
     });
     
-    // Handle paginated response from backend
+    // Manejamos respuesta paginada del backend
     if (result.data && result.data.content && Array.isArray(result.data.content)) {
       return result.data.content;
     }
@@ -99,7 +99,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Get all albums (with filtering)
+  // Obtener todos los álbumes con filtros opcionales
   async getAlbums(options = {}) {
     const { 
       isAdmin = false, 
@@ -126,7 +126,7 @@ export const apiUtils = {
       }
     });
     
-    // Handle paginated response from backend
+    // Manejamos respuesta paginada del backend
     if (result.data && result.data.content && Array.isArray(result.data.content)) {
       return result.data.content;
     }
@@ -134,7 +134,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Create a book
+  // Crear un nuevo libro
   async createBook(bookData) {
     const token = localStorage.getItem('token');
     
@@ -151,7 +151,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Update a book
+  // Actualizar un libro existente
   async updateBook(bookData) {
     const token = localStorage.getItem('token');
     
@@ -165,7 +165,7 @@ export const apiUtils = {
       body: JSON.stringify(bookData)
     });
     
-    // Handle wrapped response (update returns {ok: true, data: book})
+    // Manejamos respuesta envuelta (update devuelve {ok: true, data: book})
     if (result.data && typeof result.data === 'object' && 'data' in result.data) {
       return result.data.data;
     }
@@ -173,7 +173,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Toggle book active status (using new endpoint)
+  // Cambiar estado activo/inactivo de un libro
   async toggleBookStatus(bookId, newStatus) {
     const token = localStorage.getItem('token');
     
@@ -195,7 +195,7 @@ export const apiUtils = {
     }
   },
 
-  // Get a book by ID
+  // Obtener un libro por ID
   async getBook(bookId, isAdmin = false) {
     let url;
     if (isAdmin) {
@@ -212,20 +212,20 @@ export const apiUtils = {
       }
     });
     
-    // Handle both direct and wrapped responses
+    // Manejamos tanto respuestas directas como envueltas
     if (result.data && typeof result.data === 'object') {
-      // If response has nested data structure like {ok: true, data: book}
+      // Si la respuesta tiene estructura anidada como {ok: true, data: book}
       if ('data' in result.data) {
         return result.data.data;
       }
-      // If response is direct book data
+      // Si la respuesta son datos directos del libro
       return result.data;
     }
     
     return result.data;
   },
 
-  // Create an album
+  // Crear un nuevo álbum
   async createAlbum(albumData) {
     const token = localStorage.getItem('token');
     
@@ -242,7 +242,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Update an album
+  // Actualizar un álbum existente
   async updateAlbum(albumData) {
     const token = localStorage.getItem('token');
     
@@ -256,7 +256,7 @@ export const apiUtils = {
       body: JSON.stringify(albumData)
     });
     
-    // Handle wrapped response (update returns {ok: true, data: album})
+    // Manejamos respuesta envuelta (update devuelve {ok: true, data: album})
     if (result.data && typeof result.data === 'object' && 'data' in result.data) {
       return result.data.data;
     }
@@ -264,7 +264,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Toggle album active status (using new endpoint)
+  // Cambiar estado activo/inactivo de un álbum
   async toggleAlbumStatus(albumId, newStatus) {
     const token = localStorage.getItem('token');
     
@@ -286,7 +286,7 @@ export const apiUtils = {
     }
   },
 
-  // Get an album by ID
+  // Obtener un álbum por ID
   async getAlbum(albumId, isAdmin = false) {
     let url;
     if (isAdmin) {
@@ -303,20 +303,20 @@ export const apiUtils = {
       }
     });
     
-    // Handle both direct and wrapped responses
+    // Manejamos tanto respuestas directas como envueltas
     if (result.data && typeof result.data === 'object') {
-      // If response has nested data structure like {ok: true, data: album}
+      // Si la respuesta tiene estructura anidada como {ok: true, data: album}
       if ('data' in result.data) {
         return result.data.data;
       }
-      // If response is direct album data
+      // Si la respuesta son datos directos del álbum
       return result.data;
     }
     
     return result.data;
   },
 
-  // Get admin statistics
+  // Obtener estadísticas de administrador
   async getAdminStats() {
     const token = localStorage.getItem('token');
     
@@ -330,7 +330,7 @@ export const apiUtils = {
     return result.data;
   },
 
-  // Validate book data before sending
+  // Validar datos de libro antes del envío
   validateBookData(bookData) {
     const errors = {};
     
@@ -347,7 +347,7 @@ export const apiUtils = {
     return errors;
   },
 
-  // Validate album data before sending
+  // Validar datos de álbum antes del envío
   validateAlbumData(albumData) {
     const errors = {};
     
@@ -365,7 +365,7 @@ export const apiUtils = {
     return errors;
   },
 
-  // Format book data for API
+  // Formatear datos de libro para la API
   formatBookData(formData) {
     return {
       ...(formData.id && { id: formData.id }),
@@ -382,7 +382,7 @@ export const apiUtils = {
     };
   },
 
-  // Format album data for API
+  // Formatear datos de álbum para la API
   formatAlbumData(formData) {
     return {
       ...(formData.id && { id: formData.id }),
@@ -403,7 +403,7 @@ export const apiUtils = {
 
 export default apiUtils;
 
-// Export specific functions for easier import
+// Exportar funciones específicas para importación más fácil
 export const fetchWithErrorHandling = apiUtils.fetchWithErrorHandling.bind(apiUtils);
 export const getBooks = apiUtils.getBooks.bind(apiUtils);
 export const getAlbums = apiUtils.getAlbums.bind(apiUtils);

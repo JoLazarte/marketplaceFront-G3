@@ -29,13 +29,13 @@ export default [
       'react/jsx-no-target-blank': 'off',
       'react-refresh/only-export-components': 'off',
     
-      // New rule to throw an error for undefined variables (not imported)
+      // Regla para detectar variables no definidas (no importadas)
       'no-undef': 'error',
 
-      // Disable prop-types validation
+      // Desactivar validación de prop-types
       'react/prop-types': 'off',
 
-      // Disable warnings/errors for unused variables
+      // Desactivar warnings para variables no utilizadas
       'no-unused-vars': 'off'
     }
   }

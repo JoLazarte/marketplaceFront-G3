@@ -88,7 +88,7 @@ src/
 ## 🎮 Uso del Sistema Redux
 
 ```jsx
-// Ejemplo de uso en componentes
+// Uso típico en componentes
 import { useBooks } from '../hooks/useProducts';
 
 const MyComponent = () => {
@@ -101,7 +101,7 @@ const MyComponent = () => {
     fetchBooksData
   } = useBooks();
 
-  // Cambiar filtros
+  // Actualizar filtros
   const handleSearch = (search) => {
     setFilter('search', search);
   };
@@ -156,8 +156,8 @@ npm run lint
 ## 🔧 Configuración del Entorno
 
 Actualmente configurado con:
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) para Fast Refresh con Babel
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) para Fast Refresh con SWC
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) para recarga rápida con Babel
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) para recarga rápida con SWC
 
 ## 📋 Próximas Mejoras
 
