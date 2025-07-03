@@ -15,7 +15,8 @@ const AlbumsPage = () => {
     filters,
     fetchAlbumsData,
     forceFetchAlbums,
-    setFilter
+    setFilter,
+    isAdmin
   } = useAlbums();
 
   // Fetch albums cuando el componente se monta (solo una vez)
@@ -23,7 +24,7 @@ const AlbumsPage = () => {
     fetchAlbumsData();
   }, [fetchAlbumsData]);
 
-  // Handlers para filtros usando useCallback para evitar re-renders
+  //Handlers para filtros usando useCallback para evitar re-renders
   const handleGenreChange = useCallback((genre) => {
     setFilter('genre', genre);
   }, [setFilter]);
@@ -43,6 +44,25 @@ const AlbumsPage = () => {
   const handleRetry = useCallback(() => {
     forceFetchAlbums();
   }, [forceFetchAlbums]);
+
+  // Handler para cambio de estado de productos
+  const handleStatusChange = useCallback((id, newStatus) => {
+    console.log('Status changed for album:', id, 'New status:', newStatus);
+    // Refetch para actualizar la lista
+    setTimeout(() => {
+      forceFetchAlbums();
+    }, 500);
+  }, [forceFetchAlbums]);
+
+  // Wrapper para ProductCardDiscs con callback
+  const ProductCardDiscsWithCallback = useCallback((props) => {
+    return (
+      <ProductCardDiscs
+        {...props}
+        onStatusChange={handleStatusChange}
+      />
+    );
+  }, [handleStatusChange]);
 
   return (
     <ProductPageLayout 
@@ -64,7 +84,7 @@ const AlbumsPage = () => {
       />
       <ProductGrid
         products={albums}
-        ProductCard={ProductCardDiscs}
+        ProductCard={ProductCardDiscsWithCallback}
         emptyMessage="No se encontraron álbumes."
       />
     </ProductPageLayout>

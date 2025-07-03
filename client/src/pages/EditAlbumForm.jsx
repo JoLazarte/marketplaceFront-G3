@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
+import apiUtils from '../utils/apiUtils';
 
 // Puedes definir la URL base de tu backend aquí:
 const API_URL = 'http://localhost:8080/musicAlbums';
@@ -8,6 +11,7 @@ const API_URL = 'http://localhost:8080/musicAlbums';
 const EditAlbumForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   // Estado para el formulario y carga
   const [form, setForm] = useState(null);
@@ -47,54 +51,12 @@ const EditAlbumForm = () => {
   useEffect(() => {
     const fetchAlbum = async () => {
       try {
-        console.log(`=== INICIANDO FETCH ===`);
-        console.log(`ID del álbum: ${id}`);
-        console.log(`URL completa: ${API_URL}/${id}`);
+        const album = await apiUtils.getAlbum(id);
+        console.log('Loaded album data:', album);
         
-        const res = await fetch(`${API_URL}/${id}`);
-        
-        console.log(`=== RESPUESTA RECIBIDA ===`);
-        console.log('Status:', res.status);
-        console.log('Status Text:', res.statusText);
-        console.log('OK:', res.ok);
-        console.log('Headers:', Object.fromEntries(res.headers.entries()));
-        
-        // Leer el texto de la respuesta primero
-        const responseText = await res.text();
-        console.log('Response text:', responseText);
-        
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}\nResponse: ${responseText}`);
-        }
-        
-        // Intentar parsear como JSON
-        let data;
-        try {
-          data = JSON.parse(responseText);
-          console.log('Parsed JSON data:', data);
-        } catch (parseError) {
-          console.error('Error parsing JSON:', parseError);
-          throw new Error(`Invalid JSON response: ${responseText}`);
-        }
-        
-        // Verificar la estructura de la respuesta
-        console.log('data.ok:', data.ok);
-        console.log('data.data:', data.data);
-        console.log('data.error:', data.error);
-
-        if (!data.ok) {
-          throw new Error(data.error || 'No se encontró el álbum');
-        }
-        
-        const album = data.data;
         if (!album) {
           throw new Error('No hay datos del álbum en la respuesta');
         }
-        
-        console.log('=== DATOS DEL ÁLBUM ===');
-        console.log('Album completo:', album);
-        console.log('Album.genres:', album.genres);
-        console.log('Album.urlImage:', album.urlImage);
         
         const formData = {
           id: album.id,
@@ -107,30 +69,23 @@ const EditAlbumForm = () => {
           genres: album.genres || [],
           price: album.price || '',
           stock: album.stock || '',
-          urlImage: Array.isArray(album.urlImage) ? album.urlImage[0] || '' : album.urlImage || ''
+          urlImage: Array.isArray(album.urlImage) ? album.urlImage[0] || '' : album.urlImage || '',
+          active: album.active !== undefined ? album.active : true
         };
         
-        console.log('=== FORM DATA FINAL ===');
         console.log('Form data:', formData);
-        
         setForm(formData);
         setLoading(false);
       } catch (err) {
-        console.error('=== ERROR ===');
-        console.error('Error completo:', err);
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
+        console.error('Error loading album:', err);
         setForm(null);
         setLoading(false);
       }
     };
     
     if (id) {
-      console.log('=== USEEFFECT EJECUTADO ===');
-      console.log('ID recibido:', id);
       fetchAlbum();
     } else {
-      console.log('=== NO HAY ID ===');
       setLoading(false);
       setForm(null);
     }
@@ -185,7 +140,8 @@ const EditAlbumForm = () => {
   // --- PUT: Enviar datos editados al backend ---
   const handleSubmit = async e => {
     e.preventDefault();
-    const validationErrors = validate();
+    
+    const validationErrors = apiUtils.validateAlbumData(form);
     setErrors(validationErrors);
     setTouched({
       title: true, author: true, recordLabel: true, description: true,
@@ -194,44 +150,23 @@ const EditAlbumForm = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        // DTO que coincide con la estructura esperada por el backend
-  const dto = {
-  id: form.id,
-  title: form.title.trim(),
-  author: form.author.trim(),
-  recordLabel: form.recordLabel.trim(),
-  year: Number(form.year),
-  description: form.description.trim(),
-  isrc: form.isrc.trim(),
-  genres: form.genres, // array de strings
-  price: Number(form.price),
-  stock: Number(form.stock),
-  urlImage: form.urlImage.trim() // <-- string, no array
-};
-
-        console.log('Enviando DTO:', dto); // Para debugging
-        const token = localStorage.getItem('token');
-
-        const res = await fetch(`${API_URL}`, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          },
-          body: JSON.stringify(dto),
-        });
-        const data = await res.json();
+        const albumData = apiUtils.formatAlbumData(form);
+        console.log('Sending album data:', albumData);
         
-      if (!res.ok || data.ok === false) {
-  throw new Error(data.message || data.error || `Error ${res.status}: ${res.statusText}`);
-}
+        const result = await apiUtils.updateAlbum(albumData);
+        console.log('Update result:', result);
 
-        alert('Álbum editado correctamente');
+        toast.success('¡Álbum editado correctamente! 🎵', {
+          position: "top-right",
+          autoClose: 3000,
+        });
         navigate('/albums');
       } catch (err) {
-        console.error('Error al editar el álbum:', err);
-        alert(`Error al editar el álbum: ${err.message}`);
+        console.error('Error editing album:', err);
+        toast.error(`Error al editar el álbum: ${err.message}`, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } else {
       setShake(true);
@@ -244,6 +179,43 @@ const EditAlbumForm = () => {
         refs[firstErrorField].current.focus?.();
       }
       setTimeout(() => setShake(false), 600);
+    }
+  };
+
+  // Función para deshabilitar/habilitar álbum
+  const handleToggleActive = async () => {
+    const action = form.active ? 'deshabilitar' : 'habilitar';
+    const confirmMessage = form.active 
+      ? '¿Estás seguro de que quieres deshabilitar este álbum? Los usuarios no podrán verlo ni comprarlo.'
+      : '¿Estás seguro de que quieres habilitar este álbum? Los usuarios podrán verlo y comprarlo nuevamente.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      // Usar apiUtils para formatear y enviar datos
+      const albumData = apiUtils.formatAlbumData({
+        ...form,
+        active: !form.active // Invertir el estado
+      });
+
+      console.log('TOGGLE ALBUM - Sending data:', albumData);
+      
+      const result = await apiUtils.updateAlbum(albumData);
+      console.log('TOGGLE ALBUM - Result:', result);
+
+      setForm(prev => ({ ...prev, active: !prev.active }));
+      
+      toast.success(`¡Álbum ${form.active ? 'deshabilitado' : 'habilitado'} correctamente!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (err) {
+      toast.error(`Error al ${action} el álbum: ${err.message}`, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -452,7 +424,18 @@ const EditAlbumForm = () => {
             {touched.urlImage && errors.urlImage && <ErrorMsg>{errors.urlImage}</ErrorMsg>}
           </InputGroup>
 
-          <Button type="submit">Guardar Cambios</Button>
+          <ButtonContainer>
+            <Button type="submit">Guardar Cambios</Button>
+            {isAdmin && (
+              <DisableButton 
+                type="button" 
+                onClick={handleToggleActive}
+                $isActive={form?.active}
+              >
+                {form?.active ? '🗑️ Deshabilitar Álbum' : '✅ Habilitar Álbum'}
+              </DisableButton>
+            )}
+          </ButtonContainer>
         </Form>
       </Wrapper>
     </Bg>
@@ -614,5 +597,32 @@ const Button = styled.button`
     color: #181818;
     box-shadow: 0 6px 24px rgba(0,255,0,0.18);
     border-color: #00ff00;
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+`;
+
+const DisableButton = styled.button`
+  background: ${({ $isActive }) => $isActive ? '#ff3b3b' : '#00ff00'};
+  color: #181818;
+  border: 2px solid ${({ $isActive }) => $isActive ? '#ff3b3b' : '#00ff00'};
+  border-radius: 2rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px ${({ $isActive }) => $isActive ? 'rgba(255,59,59,0.08)' : 'rgba(0,255,0,0.08)'};
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-top: 1rem;
+  
+  &:hover {
+    background: ${({ $isActive }) => $isActive ? '#ff1a1a' : '#00e600'};
+    box-shadow: 0 6px 24px ${({ $isActive }) => $isActive ? 'rgba(255,59,59,0.18)' : 'rgba(0,255,0,0.18)'};
+    transform: translateY(-2px);
   }
 `;

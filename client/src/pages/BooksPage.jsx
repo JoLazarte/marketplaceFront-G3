@@ -15,7 +15,8 @@ const BooksPage = () => {
     filters,
     fetchBooksData,
     forceFetchBooks,
-    setFilter
+    setFilter,
+    isAdmin
   } = useBooks();
 
   // Fetch books cuando el componente se monta (solo una vez)
@@ -44,6 +45,25 @@ const BooksPage = () => {
     forceFetchBooks();
   }, [forceFetchBooks]);
 
+  // Handler para cambio de estado de productos
+  const handleStatusChange = useCallback((id, newStatus) => {
+    console.log('Status changed for book:', id, 'New status:', newStatus);
+    // Refetch para actualizar la lista
+    setTimeout(() => {
+      forceFetchBooks();
+    }, 500);
+  }, [forceFetchBooks]);
+
+  // Wrapper para ProductCardBook con callback
+  const ProductCardBookWithCallback = useCallback((props) => {
+    return (
+      <ProductCardBook
+        {...props}
+        onStatusChange={handleStatusChange}
+      />
+    );
+  }, [handleStatusChange]);
+
   return (
     <ProductPageLayout 
       title="Libros" 
@@ -64,7 +84,7 @@ const BooksPage = () => {
       />
       <ProductGrid
         products={books}
-        ProductCard={ProductCardBook}
+        ProductCard={ProductCardBookWithCallback}
         emptyMessage="No se encontraron libros."
       />
     </ProductPageLayout>

@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import apiUtils from '../utils/apiUtils';
 
 // URL base del backend
 const API_URL = 'http://localhost:8080/musicAlbums';
@@ -29,7 +31,8 @@ const AlbumForm = () => {
     price: '',
     stock: '',
     urlImage: '',
-    year: ''
+    year: '',
+    active: true
   });
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
@@ -97,7 +100,8 @@ const AlbumForm = () => {
   // POST: Enviar álbum al backend
   const handleSubmit = async e => {
     e.preventDefault();
-    const validationErrors = validate();
+    
+    const validationErrors = apiUtils.validateAlbumData(form);
     setErrors(validationErrors);
     setTouched({
       title: true, author: true, recordLabel: true, description: true,
@@ -106,62 +110,30 @@ const AlbumForm = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        // DTO para el backend
-        const dto = {
-          title: form.title.trim(),
-          author: form.author.trim(),
-          recordLabel: form.recordLabel.trim(),
-          year: Number(form.year),
-          description: form.description.trim(),
-          isrc: form.isrc.trim(),
-          genres: form.genres,
-          price: Number(form.price),
-          stock: Number(form.stock),
-          urlImage: form.urlImage.trim()
-        };
+        const albumData = apiUtils.formatAlbumData(form);
+        console.log('Creating album with data:', albumData);
+        
+        const result = await apiUtils.createAlbum(albumData);
+        console.log('Create result:', result);
 
-        const token = localStorage.getItem('token');
-        console.log('TOKEN QUE SE ENVÍA:', token);
-        console.log('DTO QUE SE ENVÍA:', dto);
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          },
-          body: JSON.stringify(dto),
+        toast.success('¡Álbum agregado correctamente! 🎵', {
+          position: "top-right",
+          autoClose: 3000,
         });
-
-        // Manejo seguro de respuesta vacía o sin JSON
-        const text = await res.text();
-        let data = {};
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (err) {
-            // Puede que el backend devuelva el álbum creado directamente
-            data = {};
-          }
-        }
-
-        if (!res.ok || (data.ok === false)) {
-          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
-        }
-
-        alert('Álbum agregado correctamente');
         navigate('/albums');
       } catch (err) {
-        console.error('Error al agregar el álbum:', err);
-        alert(`Error al agregar el álbum: ${err.message}`);
+        console.error('Error creating album:', err);
+        toast.error(`Error al agregar el álbum: ${err.message}`, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } else {
       setShake(true);
-      // Buscar el primer campo con error y hacer scroll
       const firstErrorField = [
         'title', 'author', 'recordLabel', 'year', 'description', 'isrc', 'genres', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
+      
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         refs[firstErrorField].current.focus?.();

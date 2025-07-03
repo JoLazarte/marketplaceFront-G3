@@ -4,15 +4,15 @@ import styled from 'styled-components';
 import Cart from '../Cart/Cart';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import SearchBar from '../../assets/SearchBar';
 import ShoppCartIcon from '../../assets/ShoppCartIcon';
-import { FaUser, FaChevronDown } from 'react-icons/fa';
+import { FaUser, FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
 import './Header.css';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProductsMenu, setShowProductsMenu] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { getItemCount } = useCart();
   const { isAuthenticated, logout, user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +41,18 @@ const Header = () => {
 
   const handleProductsNavigate = (route) => {
     setShowProductsMenu(false);
+    setIsMobileMenuOpen(false);
     navigate(route);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleMobileMenuClose = () => {
+    setIsMobileMenuOpen(false);
+    setShowProductsMenu(false);
+    setShowUserMenu(false);
   };
 
   return (
@@ -49,17 +60,19 @@ const Header = () => {
       <Logo>
         <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div id='logo'>
-            <img src="/Dumbo.jpg" alt="Logo" width="45" height="45" className="me-2"/>
+            <img src="/Dumbo.png" alt="Logo" width="45" height="45" className="me-2"/>
             <span className="logo-text">Dumbo Librerías</span>
           </div>
         </Link>
       </Logo>
 
-      <SearchBarContainer>
-        <SearchBar />
-      </SearchBarContainer>
+      {/* Menu hamburguesa para mobile */}
+      <MobileMenuButton onClick={toggleMobileMenu}>
+        {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+      </MobileMenuButton>
 
-      <Nav>
+      {/* Navegación desktop */}
+      <Nav $isMobileMenuOpen={isMobileMenuOpen}>
         <NavItem>
           <DropdownContainer>
             <DropdownButton onClick={handleProductsMenu}>
@@ -78,7 +91,7 @@ const Header = () => {
           </DropdownContainer>
         </NavItem>
         <NavItem>
-          <Link to="/contact">Contacto</Link>
+          <Link to="/contact" onClick={handleMobileMenuClose}>Contacto</Link>
         </NavItem>
         
         {isAuthenticated() ? (
@@ -129,9 +142,10 @@ const Header = () => {
 };
 
 const HeaderContainer = styled.header`
-  background-color: #242424;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  border-bottom: 1px solid rgba(0, 255, 0, 0.2);
   padding: 1rem 2rem;
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
@@ -139,7 +153,8 @@ const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
 `;
 
 const Logo = styled.div`
@@ -147,25 +162,79 @@ const Logo = styled.div`
   font-weight: bold;
 
   a {
-    color: #00ff00;
+    color: #ffffff;
     text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
     
     &:hover {
-      text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      color: #00ff00;
+      text-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+      transform: scale(1.05);
     }
   }
-`;
 
-const SearchBarContainer = styled.div`
-  flex: 1;
-  max-width: 600px;
-  margin: 0 2rem;
+  .logo-text {
+    background: linear-gradient(135deg, #ffffff 0%, #00ff00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-left: 0.5rem;
+  }
+
+  img {
+    border-radius: 50%;
+    border: 2px solid rgba(0, 255, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  &:hover img {
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+  }
 `;
 
 const Nav = styled.nav`
   display: flex;
   gap: 2rem;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 70px;
+    right: 0;
+    width: 100%;
+    background: rgba(20, 20, 20, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    transform: translateX(${props => props.$isMobileMenuOpen ? '0' : '100%'});
+    transition: transform 0.3s ease;
+    z-index: 999;
+  }
+`;
+
+const MobileMenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #00ff00;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
 `;
 
 const NavItem = styled.div`

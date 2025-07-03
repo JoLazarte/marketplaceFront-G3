@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import apiUtils from '../utils/apiUtils';
 
 // Enum de géneros según tu backend (ajusta si es necesario)
 const GENRE_BOOKS = [
@@ -24,7 +26,8 @@ const BookForm = () => {
     genreBooks: [],
     price: '',
     stock: '',
-    urlImage: ''
+    urlImage: '',
+    active: true
   });
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
@@ -88,7 +91,8 @@ const BookForm = () => {
   // POST: Enviar libro al backend
   const handleSubmit = async e => {
     e.preventDefault();
-    const validationErrors = validate();
+    
+    const validationErrors = apiUtils.validateBookData(form);
     setErrors(validationErrors);
     setTouched({
       title: true, author: true, editorial: true, description: true,
@@ -97,60 +101,30 @@ const BookForm = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        // DTO para el backend
-        const dto = {
-          title: form.title.trim(),
-          author: form.author.trim(),
-          editorial: form.editorial.trim(),
-          description: form.description.trim(),
-          isbn: form.isbn.trim(),
-          genreBooks: form.genreBooks, // Array de strings exactos del enum
-          price: Number(form.price),
-          stock: Number(form.stock),
-          urlImage: form.urlImage.trim()
-        };
+        const bookData = apiUtils.formatBookData(form);
+        console.log('Creating book with data:', bookData);
+        
+        const result = await apiUtils.createBook(bookData);
+        console.log('Create result:', result);
 
-        const token = localStorage.getItem('token');
-        console.log('TOKEN QUE SE ENVÍA:', token);
-        console.log('DTO QUE SE ENVÍA:', dto);
-
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          },
-          body: JSON.stringify(dto),
+        toast.success('¡Libro agregado correctamente! 📚', {
+          position: "top-right",
+          autoClose: 3000,
         });
-
-        // Manejo seguro de respuesta vacía o sin JSON
-        const text = await res.text();
-        let data = {};
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (err) {
-            data = {};
-          }
-        }
-
-        if (!res.ok || (data.ok === false)) {
-          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
-        }
-
-        alert('Libro agregado correctamente');
         navigate('/books');
       } catch (err) {
-        console.error('Error al agregar el libro:', err);
-        alert(`Error al agregar el libro: ${err.message}`);
+        console.error('Error creating book:', err);
+        toast.error(`Error al agregar el libro: ${err.message}`, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } else {
       setShake(true);
-      // Buscar el primer campo con error y hacer scroll
       const firstErrorField = [
         'title', 'author', 'editorial', 'description', 'isbn', 'genreBooks', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
+      
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         refs[firstErrorField].current.focus?.();

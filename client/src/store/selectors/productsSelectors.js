@@ -1,17 +1,83 @@
-// Selectores para libros
+import { createSelector } from '@reduxjs/toolkit';
+
+// Selectores básicos para libros
 export const selectBooksState = (state) => state.products.books;
 export const selectBooks = (state) => state.products.books.data;
-export const selectFilteredBooks = (state) => state.products.books.filteredData;
 export const selectBooksLoading = (state) => state.products.books.loading;
 export const selectBooksError = (state) => state.products.books.error;
 export const selectBooksGenres = (state) => state.products.books.genres;
 export const selectBooksFilters = (state) => state.products.books.filters;
 
-// Selectores para álbumes
+// Selectores básicos para álbumes
 export const selectAlbumsState = (state) => state.products.albums;
 export const selectAlbums = (state) => state.products.albums.data;
-export const selectFilteredAlbums = (state) => state.products.albums.filteredData;
 export const selectAlbumsLoading = (state) => state.products.albums.loading;
 export const selectAlbumsError = (state) => state.products.albums.error;
 export const selectAlbumsGenres = (state) => state.products.albums.genres;
 export const selectAlbumsFilters = (state) => state.products.albums.filters;
+
+// Selectores para productos filtrados (sin filtrado por active ya que se hace en backend)
+export const selectFilteredBooks = createSelector(
+  [selectBooks, selectBooksFilters],
+  (books, filters) => {
+    let filtered = [...books];
+
+    // Aplicar filtros existentes
+    if (filters.genre !== 'Todos') {
+      filtered = filtered.filter(product => 
+        (product.genreBooks || []).includes(filters.genre)
+      );
+    }
+
+    if (filters.search.trim() !== '') {
+      filtered = filtered.filter(product => {
+        const titleMatch = product.title?.toLowerCase().includes(filters.search.toLowerCase());
+        const authorMatch = product.author?.toLowerCase().includes(filters.search.toLowerCase());
+        return titleMatch || authorMatch;
+      });
+    }
+
+    if (filters.bestseller) {
+      filtered = filtered.sort((a, b) => a.id - b.id).slice(0, 3);
+    }
+
+    if (filters.promo) {
+      filtered = filtered.filter(product => product.price < 20);
+    }
+
+    return filtered;
+  }
+);
+
+export const selectFilteredAlbums = createSelector(
+  [selectAlbums, selectAlbumsFilters],
+  (albums, filters) => {
+    let filtered = [...albums];
+
+    // Aplicar filtros existentes
+    if (filters.genre !== 'Todos') {
+      filtered = filtered.filter(product => 
+        (product.genres || []).includes(filters.genre)
+      );
+    }
+
+    if (filters.search.trim() !== '') {
+      filtered = filtered.filter(product => {
+        const titleMatch = product.title?.toLowerCase().includes(filters.search.toLowerCase());
+        const authorMatch = product.author?.toLowerCase().includes(filters.search.toLowerCase());
+        const artistMatch = product.artist?.toLowerCase().includes(filters.search.toLowerCase());
+        return titleMatch || authorMatch || artistMatch;
+      });
+    }
+
+    if (filters.bestseller) {
+      filtered = filtered.sort((a, b) => a.id - b.id).slice(0, 3);
+    }
+
+    if (filters.promo) {
+      filtered = filtered.filter(product => product.price < 20);
+    }
+
+    return filtered;
+  }
+);

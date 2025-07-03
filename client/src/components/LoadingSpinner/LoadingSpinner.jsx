@@ -27,9 +27,9 @@ const LoadingSpinner = ({ message = "Cargando...", type = "books" }) => {
       </SpinnerWrapper>
       <LoadingText>{message}</LoadingText>
       <LoadingDots>
-        <Dot delay="0s" />
-        <Dot delay="0.2s" />
-        <Dot delay="0.4s" />
+        <Dot $delay="0s" />
+        <Dot $delay="0.2s" />
+        <Dot $delay="0.4s" />
       </LoadingDots>
     </LoadingContainer>
   );
@@ -150,7 +150,7 @@ const Dot = styled.div`
   border-radius: 50%;
   background: linear-gradient(45deg, #01be96, #00ff88);
   animation: ${pulse} 1.5s ease-in-out infinite;
-  animation-delay: ${props => props.delay};
+  animation-delay: ${props => props.$delay};
 `;
 
 export default LoadingSpinner;

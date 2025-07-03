@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
+import apiUtils from '../utils/apiUtils';
 
 // Enum de géneros según tu backend (ajusta si es necesario)
 const GENRE_BOOKS = [
@@ -17,6 +20,7 @@ const API_URL = 'http://localhost:8080/books';
 const EditBookForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const [form, setForm] = useState(null);
   const [touched, setTouched] = useState({});
@@ -40,24 +44,13 @@ const EditBookForm = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const res = await fetch(`${API_URL}/${id}`);
-        const responseText = await res.text();
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}\nResponse: ${responseText}`);
-        }
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          throw new Error(`Invalid JSON response: ${responseText}`);
-        }
-        if (!data.ok) {
-          throw new Error(data.error || 'No se encontró el libro');
-        }
-        const book = data.data;
+        const book = await apiUtils.getBook(id);
+        console.log('Loaded book data:', book);
+        
         if (!book) {
           throw new Error('No hay datos del libro en la respuesta');
         }
+        
         setForm({
           id: book.id,
           title: book.title || '',
@@ -68,16 +61,20 @@ const EditBookForm = () => {
           genreBooks: book.genreBooks || [],
           price: book.price || '',
           stock: book.stock || '',
-          urlImage: book.urlImage || ''
+          urlImage: book.urlImage || '',
+          active: book.active !== undefined ? book.active : true
         });
         setLoading(false);
       } catch (err) {
+        console.error('Error loading book:', err);
         setForm(null);
         setLoading(false);
       }
     };
-    if (id) fetchBook();
-    else {
+    
+    if (id) {
+      fetchBook();
+    } else {
       setLoading(false);
       setForm(null);
     }
@@ -127,7 +124,8 @@ const EditBookForm = () => {
   // --- PUT: Enviar datos editados al backend ---
   const handleSubmit = async e => {
     e.preventDefault();
-    const validationErrors = validate();
+    
+    const validationErrors = apiUtils.validateBookData(form);
     setErrors(validationErrors);
     setTouched({
       title: true, author: true, editorial: true, description: true,
@@ -136,55 +134,72 @@ const EditBookForm = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const dto = {
-          id: form.id,
-          title: form.title.trim(),
-          author: form.author.trim(),
-          editorial: form.editorial.trim(),
-          description: form.description.trim(),
-          isbn: form.isbn.trim(),
-          genreBooks: form.genreBooks, // Array de strings exactos del enum
-          price: Number(form.price),
-          stock: Number(form.stock),
-          urlImage: form.urlImage.trim()
-        };
+        const bookData = apiUtils.formatBookData(form);
+        console.log('Sending book data:', bookData);
+        
+        const result = await apiUtils.updateBook(bookData);
+        console.log('Update result:', result);
 
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          },
-          body: JSON.stringify(dto),
+        toast.success('¡Libro editado correctamente! 📚', {
+          position: "top-right",
+          autoClose: 3000,
         });
-
-        const text = await res.text();
-        let data = {};
-        if (text) {
-          data = JSON.parse(text);
-        }
-
-        if (!res.ok || (data.ok === false)) {
-          throw new Error((data && (data.message || data.error)) || `Error ${res.status}: ${res.statusText}`);
-        }
-
-        alert('Libro editado correctamente');
         navigate('/books');
       } catch (err) {
-        alert(`Error al editar el libro: ${err.message}`);
+        console.error('Error editing book:', err);
+        toast.error(`Error al editar el libro: ${err.message}`, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } else {
       setShake(true);
       const firstErrorField = [
         'title', 'author', 'editorial', 'description', 'isbn', 'genreBooks', 'price', 'stock', 'urlImage'
       ].find(field => validationErrors[field]);
+      
       if (firstErrorField && refs[firstErrorField].current) {
         refs[firstErrorField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         refs[firstErrorField].current.focus?.();
       }
       setTimeout(() => setShake(false), 600);
+    }
+  };
+
+  // Función para deshabilitar/habilitar libro
+  const handleToggleActive = async () => {
+    const action = form.active ? 'deshabilitar' : 'habilitar';
+    const confirmMessage = form.active 
+      ? '¿Estás seguro de que quieres deshabilitar este libro? Los usuarios no podrán verlo ni comprarlo.'
+      : '¿Estás seguro de que quieres habilitar este libro? Los usuarios podrán verlo y comprarlo nuevamente.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      // Usar apiUtils para formatear y enviar datos
+      const bookData = apiUtils.formatBookData({
+        ...form,
+        active: !form.active // Invertir el estado
+      });
+
+      console.log('TOGGLE BOOK - Sending data:', bookData);
+      
+      const result = await apiUtils.updateBook(bookData);
+      console.log('TOGGLE BOOK - Result:', result);
+
+      setForm(prev => ({ ...prev, active: !prev.active }));
+      
+      toast.success(`¡Libro ${form.active ? 'deshabilitado' : 'habilitado'} correctamente!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (err) {
+      toast.error(`Error al ${action} el libro: ${err.message}`, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -365,7 +380,19 @@ const EditBookForm = () => {
             />
             {touched.urlImage && errors.urlImage && <ErrorMsg>{errors.urlImage}</ErrorMsg>}
           </InputGroup>
-          <Button type="submit">Guardar Cambios</Button>
+          
+          <ButtonContainer>
+            <Button type="submit">Guardar Cambios</Button>
+            {isAdmin && (
+              <DisableButton 
+                type="button" 
+                onClick={handleToggleActive}
+                $isActive={form?.active}
+              >
+                {form?.active ? '🗑️ Deshabilitar Libro' : '✅ Habilitar Libro'}
+              </DisableButton>
+            )}
+          </ButtonContainer>
         </Form>
       </Wrapper>
     </Bg>
@@ -527,5 +554,32 @@ const Button = styled.button`
     color: #181818;
     box-shadow: 0 6px 24px rgba(0,255,0,0.18);
     border-color: #00ff00;
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+`;
+
+const DisableButton = styled.button`
+  background: ${({ $isActive }) => $isActive ? '#ff3b3b' : '#00ff00'};
+  color: #181818;
+  border: 2px solid ${({ $isActive }) => $isActive ? '#ff3b3b' : '#00ff00'};
+  border-radius: 2rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px ${({ $isActive }) => $isActive ? 'rgba(255,59,59,0.08)' : 'rgba(0,255,0,0.08)'};
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-top: 1rem;
+  
+  &:hover {
+    background: ${({ $isActive }) => $isActive ? '#ff1a1a' : '#00e600'};
+    box-shadow: 0 6px 24px ${({ $isActive }) => $isActive ? 'rgba(255,59,59,0.18)' : 'rgba(0,255,0,0.18)'};
+    transform: translateY(-2px);
   }
 `;

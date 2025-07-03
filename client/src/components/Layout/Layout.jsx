@@ -1,4 +1,3 @@
-import NavAside from '../NavAside/NavAside'
 import './Layout.css'
 import Carrusel from '../Portada/Carrusel'
 import { slides } from '../../assets/carouselData.json'
@@ -16,7 +15,6 @@ const Layout = () => {
     <>
       {isHomePage ? (
         <>
-          <NavAside/>
           <main>
             <section id='portada'>
               <Carrusel data={slides}> </Carrusel>

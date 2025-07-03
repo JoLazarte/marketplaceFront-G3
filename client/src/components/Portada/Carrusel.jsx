@@ -1,22 +1,58 @@
 import React, { useState } from 'react'
 import { BsArrowLeftCircleFill, BsArrowRightCircleFill } from "react-icons/bs";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Carrusel.css';
 
 const Carrusel = ({data}) =>{
   const [slide, setSlide] = useState(0);
+  const navigate = useNavigate();
+  
+  // Temporalmente sin autenticación para debug
+  let user = null;
+  try {
+    const auth = useAuth();
+    user = auth?.user;
+  } catch (error) {
+    console.warn('AuthContext not available, using fallback');
+    user = null;
+  }
+
+  // Filtrar slides basado en el estado de autenticación
+  const filteredData = user ? data.filter(item => item.id !== 3) : data;
+
+  if (!data || data.length === 0) {
+    return <div style={{ color: 'white' }}>No hay datos para mostrar</div>;
+  }
 
   const nextSlide = () => {
-    setSlide(slide === data.length - 1 ? 0 : slide + 1);
+    setSlide(slide === filteredData.length - 1 ? 0 : slide + 1);
   };
 
   const prevSlide = () => {
-    setSlide(slide === 0 ? data.length - 1 : slide - 1);
+    setSlide(slide === 0 ? filteredData.length - 1 : slide - 1);
+  };
+
+  const handleButtonClick = (item) => {
+    switch(item.id) {
+      case 1:
+        navigate('/books');
+        break;
+      case 2:
+        navigate('/albums');
+        break;
+      case 3:
+        navigate('/register');
+        break;
+      default:
+        break;
+    }
   };
 
   return (
     <div className="carousel">
       
-      {data.map((item, idx) => {
+      {filteredData.map((item, idx) => {
         return (
           <div key={idx} className={slide === idx ? "slide" : "slide slide-hidden"} >
             <img className='imgCarrusel'
@@ -26,7 +62,12 @@ const Carrusel = ({data}) =>{
             <div className='insideCard'>
               <h3 title={item.title}> {item.title} </h3>
               <p text={item.text} > {item.text} </p>
-              <button className="btnInsideCard" textbutton={item.textbutton}> {item.textbutton}</button>
+              <button 
+                className="btnInsideCard" 
+                onClick={() => handleButtonClick(item)}
+              > 
+                {item.textbutton}
+              </button>
             </div>
            
           </div>
@@ -39,7 +80,7 @@ const Carrusel = ({data}) =>{
         className="arrow arrow-right"
       />
       <span className="indicators">
-        {data.map((_, idx) => {
+        {filteredData.map((_, idx) => {
           return (
             <button
               key={idx}

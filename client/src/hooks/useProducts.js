@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { 
   fetchBooks, 
   fetchAlbums,
@@ -16,34 +17,56 @@ import {
   selectBooksError,
   selectBooksGenres,
   selectBooksFilters,
+  selectBooksState,
   selectFilteredAlbums,
   selectAlbumsLoading,
   selectAlbumsError,
   selectAlbumsGenres,
-  selectAlbumsFilters
+  selectAlbumsFilters,
+  selectAlbumsState
 } from '../store/selectors/productsSelectors';
 
 // Hook para manejar libros
 export const useBooks = () => {
   const dispatch = useDispatch();
+  const { isAuthenticated, isAdmin } = useAuth();
   
-  const books = useSelector(selectFilteredBooks);
+  const books = useSelector(state => selectFilteredBooks(state));
   const loading = useSelector(selectBooksLoading);
   const error = useSelector(selectBooksError);
   const genres = useSelector(selectBooksGenres);
   const filters = useSelector(selectBooksFilters);
   const allBooks = useSelector(selectBooks);
+  const booksState = useSelector(selectBooksState);
 
   const fetchBooksData = useCallback(() => {
-    // Solo hacer fetch si no hay datos y no se está cargando
-    if (allBooks.length === 0 && !loading) {
-      dispatch(fetchBooks());
+    const isUserAdmin = isAdmin();
+    const shouldFetchOnlyActive = !isUserAdmin; // Solo productos activos para no-admin
+    
+    // Solo hacer fetch si no hay datos o si cambió el contexto de admin
+    const needsRefetch = allBooks.length === 0 || 
+                        !booksState?.lastFetchParams ||
+                        booksState.lastFetchParams.isAdmin !== isUserAdmin;
+    
+    if (needsRefetch && !loading) {
+      console.log('Fetching books for user:', { isAdmin: isUserAdmin, activeOnly: shouldFetchOnlyActive });
+      dispatch(fetchBooks({ 
+        isAdmin: isUserAdmin, 
+        activeOnly: shouldFetchOnlyActive 
+      }));
     }
-  }, [dispatch, allBooks.length, loading]);
+  }, [dispatch, allBooks.length, loading, isAdmin, booksState?.lastFetchParams?.isAdmin]);
 
   const forceFetchBooks = useCallback(() => {
-    dispatch(fetchBooks());
-  }, [dispatch]);
+    const isUserAdmin = isAdmin();
+    const shouldFetchOnlyActive = !isUserAdmin;
+    
+    console.log('Force fetching books for user:', { isAdmin: isUserAdmin, activeOnly: shouldFetchOnlyActive });
+    dispatch(fetchBooks({ 
+      isAdmin: isUserAdmin, 
+      activeOnly: shouldFetchOnlyActive 
+    }));
+  }, [dispatch, isAdmin]);
 
   const setFilter = useCallback((filterType, value) => {
     dispatch(setBooksFilter({ filterType, value }));
@@ -62,31 +85,52 @@ export const useBooks = () => {
     fetchBooksData,
     forceFetchBooks,
     setFilter,
-    resetFilters
+    resetFilters,
+    isAdmin: isAdmin()
   };
 };
 
 // Hook para manejar álbumes
 export const useAlbums = () => {
   const dispatch = useDispatch();
+  const { isAuthenticated, isAdmin } = useAuth();
   
-  const albums = useSelector(selectFilteredAlbums);
+  const albums = useSelector(state => selectFilteredAlbums(state));
   const loading = useSelector(selectAlbumsLoading);
   const error = useSelector(selectAlbumsError);
   const genres = useSelector(selectAlbumsGenres);
   const filters = useSelector(selectAlbumsFilters);
   const allAlbums = useSelector(selectAlbums);
+  const albumsState = useSelector(selectAlbumsState);
 
   const fetchAlbumsData = useCallback(() => {
-    // Solo hacer fetch si no hay datos y no se está cargando
-    if (allAlbums.length === 0 && !loading) {
-      dispatch(fetchAlbums());
+    const isUserAdmin = isAdmin();
+    const shouldFetchOnlyActive = !isUserAdmin; // Solo productos activos para no-admin
+    
+    // Solo hacer fetch si no hay datos o si cambió el contexto de admin
+    const needsRefetch = allAlbums.length === 0 || 
+                        !albumsState.lastFetchParams ||
+                        albumsState.lastFetchParams.isAdmin !== isUserAdmin;
+    
+    if (needsRefetch && !loading) {
+      console.log('Fetching albums for user:', { isAdmin: isUserAdmin, activeOnly: shouldFetchOnlyActive });
+      dispatch(fetchAlbums({ 
+        isAdmin: isUserAdmin, 
+        activeOnly: shouldFetchOnlyActive 
+      }));
     }
-  }, [dispatch, allAlbums.length, loading]);
+  }, [dispatch, allAlbums.length, loading, isAdmin, albumsState?.lastFetchParams?.isAdmin]);
 
   const forceFetchAlbums = useCallback(() => {
-    dispatch(fetchAlbums());
-  }, [dispatch]);
+    const isUserAdmin = isAdmin();
+    const shouldFetchOnlyActive = !isUserAdmin;
+    
+    console.log('Force fetching albums for user:', { isAdmin: isUserAdmin, activeOnly: shouldFetchOnlyActive });
+    dispatch(fetchAlbums({ 
+      isAdmin: isUserAdmin, 
+      activeOnly: shouldFetchOnlyActive 
+    }));
+  }, [dispatch, isAdmin]);
 
   const setFilter = useCallback((filterType, value) => {
     dispatch(setAlbumsFilter({ filterType, value }));
@@ -105,7 +149,8 @@ export const useAlbums = () => {
     fetchAlbumsData,
     forceFetchAlbums,
     setFilter,
-    resetFilters
+    resetFilters,
+    isAdmin: isAdmin()
   };
 };
 

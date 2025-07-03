@@ -19,8 +19,9 @@ import CheckoutPage from './pages/CheckoutPage';
 import Contact from './pages/Contact';
 import { Provider } from 'react-redux';
 import store from './store/store';
-//import ProductCard from './components/ProductCard/ProductCard'
-//se puede sacar el ProductGrid
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const App = () => {
   return (
     <Provider store={store}>
@@ -45,6 +46,21 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         </Routes>
         <Footer />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          style={{
+            fontSize: '14px'
+          }}
+        />
       </CartProvider>
     </AuthProvider>
     </Provider>

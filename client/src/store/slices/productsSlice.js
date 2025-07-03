@@ -1,23 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import apiUtils from '../../utils/apiUtils';
 
 // Async thunks para obtener productos
 export const fetchBooks = createAsyncThunk(
   'products/fetchBooks',
-  async (_, { rejectWithValue, getState }) => {
+  async ({ isAdmin = false, activeOnly = true } = {}, { rejectWithValue, getState }) => {
     try {
-      // Evitar múltiples llamadas si ya hay datos
-      const state = getState();
-      if (state.products.books.data.length > 0) {
-        return state.products.books.data;
-      }
+      console.log('Fetching books with params:', { isAdmin, activeOnly });
       
-      const response = await fetch('http://localhost:8080/books');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data.content || [];
+      // Delay obligatorio de 1.5 segundos para mostrar animación de carga
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const data = await apiUtils.getBooks({ isAdmin, activeOnly });
+      console.log('Books fetched successfully:', data?.length || 0, 'items');
+      return data || [];
     } catch (error) {
+      console.error('Error fetching books:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -25,21 +23,18 @@ export const fetchBooks = createAsyncThunk(
 
 export const fetchAlbums = createAsyncThunk(
   'products/fetchAlbums',
-  async (_, { rejectWithValue, getState }) => {
+  async ({ isAdmin = false, activeOnly = true } = {}, { rejectWithValue, getState }) => {
     try {
-      // Evitar múltiples llamadas si ya hay datos
-      const state = getState();
-      if (state.products.albums.data.length > 0) {
-        return state.products.albums.data;
-      }
+      console.log('Fetching albums with params:', { isAdmin, activeOnly });
       
-      const response = await fetch('http://localhost:8080/musicAlbums');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data.content || [];
+      // Delay obligatorio de 1.5 segundos para mostrar animación de carga
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const data = await apiUtils.getAlbums({ isAdmin, activeOnly });
+      console.log('Albums fetched successfully:', data?.length || 0, 'items');
+      return data || [];
     } catch (error) {
+      console.error('Error fetching albums:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -100,6 +95,7 @@ const productsSlice = createSlice({
         bestseller: false,
         promo: false,
       },
+      lastFetchParams: null, // Para evitar fetches innecesarios
     },
     albums: {
       data: [],
@@ -113,6 +109,7 @@ const productsSlice = createSlice({
         bestseller: false,
         promo: false,
       },
+      lastFetchParams: null, // Para evitar fetches innecesarios
     },
   },
   reducers: {
@@ -165,9 +162,14 @@ const productsSlice = createSlice({
       .addCase(fetchBooks.fulfilled, (state, action) => {
         state.books.loading = false;
         state.books.data = action.payload;
-        state.books.filteredData = action.payload;
+        state.books.filteredData = filterProducts(
+          action.payload,
+          state.books.filters,
+          'genreBooks'
+        );
         state.books.genres = ['Todos', ...getAllGenres(action.payload, 'genreBooks')];
         state.books.error = null;
+        state.books.lastFetchParams = action.meta.arg;
       })
       .addCase(fetchBooks.rejected, (state, action) => {
         state.books.loading = false;
@@ -183,9 +185,14 @@ const productsSlice = createSlice({
       .addCase(fetchAlbums.fulfilled, (state, action) => {
         state.albums.loading = false;
         state.albums.data = action.payload;
-        state.albums.filteredData = action.payload;
+        state.albums.filteredData = filterProducts(
+          action.payload,
+          state.albums.filters,
+          'genres'
+        );
         state.albums.genres = ['Todos', ...getAllGenres(action.payload, 'genres')];
         state.albums.error = null;
+        state.albums.lastFetchParams = action.meta.arg;
       })
       .addCase(fetchAlbums.rejected, (state, action) => {
         state.albums.loading = false;
