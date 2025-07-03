@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const ProductCardBook = ({ item }) => {
   if (!item) return null;
-  const { id, title, author, description, urlImage, price, stock } = item;
+  const { id, title, author, editorial, description, urlImage, price, stock } = item;
   const isOutOfStock = stock === 0;
   const navigate = useNavigate();
   const { canEditProducts } = useAuth();
@@ -20,6 +20,7 @@ const ProductCardBook = ({ item }) => {
       <div className="details">
         <h3 className="title">{title}</h3>
         <p className="author">{author}</p>
+        {editorial && <p className="editorial">{editorial}</p>}
         <p className="description">{description}</p>
         <p className="price">${price}</p>
       </div>

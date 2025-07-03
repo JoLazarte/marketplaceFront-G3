@@ -17,12 +17,15 @@ import EditBookForm from './pages/EditBookForm';
 import EditAlbumForm from './pages/EditAlbumForm';
 import CheckoutPage from './pages/CheckoutPage';
 import Contact from './pages/Contact';
+import { Provider } from 'react-redux';
+import store from './store/store';
 //import ProductCard from './components/ProductCard/ProductCard'
 //se puede sacar el ProductGrid
 const App = () => {
   return (
-    <AuthProvider>
-      <CartProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <CartProvider>
         <Header />
         <Cart />
         <Routes>
@@ -44,6 +47,7 @@ const App = () => {
         <Footer />
       </CartProvider>
     </AuthProvider>
+    </Provider>
   )
 }
 

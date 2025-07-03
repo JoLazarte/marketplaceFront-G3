@@ -1,18 +1,93 @@
+/* Footer específico - sobrescribir Bootstrap */
 footer {
-
-  padding:160px 0px;
-  color: rgb(240, 245, 255);
- background-color: #625f5f;
+  padding: 1.5rem 0 !important;
+  color: rgb(240, 245, 255) !important;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
 }
 
-.footer-btns{
-  margin-right: -8rem;
+.footer-container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 2rem !important;
 }
 
-.footer-btns button,
-.footer-btns a {
-  margin-right: 1rem;
+.footer-content {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
 }
-.marginright{
-  margin-left: -8rem;
+
+.footer-text {
+  margin: 0 !important;
+  font-size: 0.9rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.footer-btns {
+  display: flex !important;
+  gap: 0.5rem !important;
+}
+
+.footer-btn {
+  padding: 0.5rem 1rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: transparent !important;
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.footer-btn:hover {
+  background-color: #00ff00 !important;
+  border-color: #00ff00 !important;
+  color: #000 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3) !important;
+}
+
+.footer-btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.5) !important;
+}
+
+.footer-btn svg {
+  font-size: 1.2rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  footer {
+    padding: 1rem 0 !important;
+  }
+  
+  .footer-content {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .footer-btns {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  .footer-btn {
+    min-width: 44px !important;
+    height: 44px !important;
+  }
 }
