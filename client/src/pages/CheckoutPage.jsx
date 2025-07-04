@@ -1,29 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useBuys } from '../hooks/useBuys';
+import { seleccionarMetodoDePago, limpiarMetodoDePago } from '../store/slices/pagoSlice';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user, token } = useAuth();
   const { confirmBuy, emptyBuy, loading, error } = useBuys();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  // Obtener método de pago seleccionado desde Redux
+  const metodoSeleccionado = useSelector((state) => state.pago.metodoSeleccionado);
+
+  // Función para manejar selección de método de pago
+  const handleSeleccionarMetodo = (metodo) => {
+    dispatch(seleccionarMetodoDePago(metodo));
+  };
+
   const handleCancel = async () => {
-    // Obtener el ID de la compra
     const buyId = localStorage.getItem('currentBuyId');
     
     if (!buyId) {
-      // Si no hay buyId, simplemente volver atrás
       navigate(-1);
       return;
     }
 
-    // Mostrar modal de confirmación
     setShowCancelModal(true);
   };
 
@@ -31,14 +39,14 @@ const CheckoutPage = () => {
     try {
       const buyId = localStorage.getItem('currentBuyId');
       
-      // Vaciar la compra en el backend
       await emptyBuy(buyId, token);
       
-      // Limpiar localStorage y carrito
       localStorage.removeItem('currentBuyId');
       clearCart();
       
-      // Cerrar modal y volver al home
+      // Limpiar método de pago seleccionado
+      dispatch(limpiarMetodoDePago());
+      
       setShowCancelModal(false);
       navigate('/');
     } catch (err) {
@@ -52,27 +60,43 @@ const CheckoutPage = () => {
   };
 
   const handleConfirmPurchase = async () => {
+    // Validar que se haya seleccionado un método de pago
+    if (!metodoSeleccionado) {
+      alert('Por favor, selecciona un método de pago antes de confirmar la compra.');
+      return;
+    }
+
     try {
-      // Obtener el ID de la compra que se guardó en localStorage
       const buyId = localStorage.getItem('currentBuyId');
       
       if (!buyId) {
         throw new Error('No se encontró el ID de la compra. Por favor, vuelve al carrito e intenta nuevamente.');
       }
 
+      // Procesar según el método de pago seleccionado
+      if (metodoSeleccionado === 'mercadopago') {
+        // FUTURA INTEGRACIÓN: Aquí se integrará la API de Mercado Pago
+        console.log('Procesando pago con Mercado Pago...');
+        // await procesarPagoMercadoPago(buyId, getCartTotal());
+      } else if (metodoSeleccionado === 'paypal') {
+        console.log('Procesando pago con PayPal...');
+      } else if (metodoSeleccionado === 'efectivo') {
+        console.log('Pago en efectivo confirmado');
+      }
+
       const confirmedBuy = await confirmBuy(buyId, token);
       console.log('Compra confirmada:', confirmedBuy);
 
       clearCart();
-      
       localStorage.removeItem('currentBuyId');
       
-     
+      // Limpiar método de pago después de confirmar
+      dispatch(limpiarMetodoDePago());
+      
       setShowSuccessModal(true);
       
     } catch (err) {
       console.error('Error en la compra:', err);
-
     }
   };
 
@@ -114,6 +138,36 @@ const CheckoutPage = () => {
             <TotalLabel>Total a Pagar:</TotalLabel>
             <TotalAmount>${getCartTotal().toFixed(2)}</TotalAmount>
           </TotalSection>
+
+          {/* SECCIÓN DE MÉTODOS DE PAGO */}
+          <PaymentSection>
+            <h3>Método de Pago</h3>
+            <PaymentMethods>
+              <PaymentMethod 
+                className={metodoSeleccionado === 'mercadopago' ? 'seleccionado' : ''}
+                onClick={() => handleSeleccionarMetodo('mercadopago')}
+              >
+                <PaymentIcon>💳</PaymentIcon>
+                <PaymentText>Mercado Pago</PaymentText>
+              </PaymentMethod>
+
+              <PaymentMethod 
+                className={metodoSeleccionado === 'paypal' ? 'seleccionado' : ''}
+                onClick={() => handleSeleccionarMetodo('paypal')}
+              >
+                <PaymentIcon>🅿️</PaymentIcon>
+                <PaymentText>PayPal</PaymentText>
+              </PaymentMethod>
+
+              <PaymentMethod 
+                className={metodoSeleccionado === 'efectivo' ? 'seleccionado' : ''}
+                onClick={() => handleSeleccionarMetodo('efectivo')}
+              >
+                <PaymentIcon>💵</PaymentIcon>
+                <PaymentText>Efectivo</PaymentText>
+              </PaymentMethod>
+            </PaymentMethods>
+          </PaymentSection>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -472,4 +526,60 @@ const CancelModalButton = styled.button`
   }
 `;
 
-export default CheckoutPage; 
+// NUEVOS STYLED COMPONENTS para métodos de pago
+const PaymentSection = styled.div`
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  
+  h3 {
+    color: #00ff00;
+    margin-bottom: 1rem;
+  }
+`;
+
+const PaymentMethods = styled.div`
+  display: flex;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const PaymentMethod = styled.div`
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid #404040;
+  background: #242424;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    border-color: #00ff00;
+    background: #333;
+  }
+  
+  &.seleccionado {
+    border-color: #00ff00;
+    background: #333;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+  }
+`;
+
+const PaymentIcon = styled.span`
+  font-size: 1.5rem;
+`;
+
+const PaymentText = styled.span`
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+export default CheckoutPage;
