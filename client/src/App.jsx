@@ -37,9 +37,14 @@ const App = () => {
           <Route path="/book-form" element={<BookForm />} />
           <Route path="/edit/book/:id" element={<EditBookForm />} />
           <Route path="/edit/album/:id" element={<EditAlbumForm />} />
+<<<<<<< Updated upstream
           <Route path="/contact" element={<Contact />} />
           
           
+=======
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/contact" element={<Contact />} />
+>>>>>>> Stashed changes
         </Routes>
         <Footer />
       </CartProvider>
